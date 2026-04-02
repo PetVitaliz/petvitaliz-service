@@ -1,3 +1,61 @@
+Home
+-”/”
+get dos planos
+-------------------------------------------------
+Serviços
+-”/servicos”
+------------------------------------------------
+Sobre Nos
+-”/sobre-nos”
+-------------------------------------------------------
+Contato
+-“/contato”
+post
+ body {
+nome:
+email:
+mensagem:
+}
+---------------------------------------------------------
+Serviços de Emergencia
+-”/servicos-de-emergencia”
+----------------------------------------------------------
+Cadastro
+-”/user/cadastro”
+post
+ body {
+email:
+cpf:
+primeiro nome:
+sobrenome:
+data nascimento:
+genero:
+senha:
+telefone
+}
+--------------------------------------------------------------
+Login
+-”/user/login”
+post
+ body {
+email:
+senha:
+}
+--------------------------------------------------------------
+Agendamento
+-”/user/Agendamento”
+post e get
+get dos id do pet daquele usuário
+get dos horários
+ body {
+serviço:
+observacoes:
+}
+-------------------------------------------
+Home Logada
+-”/user/home”
+get dos planos e nome do usuario
+-------------------------------------------
 cadastrar pet
 -”/user/cadastrar/pet”
 post
@@ -185,60 +243,3 @@ visualizar consulta
 -”/adm/listar/consultas”
 get das consultas por medico
 -----------------------------------------------
-Home
--”/”
-get dos planos
--------------------------------------------------
-Serviços
--”/servicos”
-------------------------------------------------
-Sobre Nos
--”/sobre-nos”
--------------------------------------------------------
-Contato
--“/contato”
-post
- body {
-nome:
-email:
-mensagem:
-}
----------------------------------------------------------
-Serviços de Emergencia
--”/servicos-de-emergencia”
-----------------------------------------------------------
-Cadastro
--”/user/cadastro”
-post
- body {
-email:
-cpf:
-primeiro nome:
-sobrenome:
-data nascimento:
-genero:
-senha:
-telefone
-}
---------------------------------------------------------------
-Login
--”/user/login”
-post
- body {
-email:
-senha:
-}
---------------------------------------------------------------
-Agendamento
--”/user/Agendamento”
-post e get
-get dos id do pet daquele usuário
-get dos horários
- body {
-serviço:
-observacoes:
-}
--------------------------------------------
-Home Logada
--”/user/home”
-get dos planos e nome do usuario
