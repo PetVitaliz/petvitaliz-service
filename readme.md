@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 Home
 -”/”
 get dos planos
@@ -244,6 +243,3 @@ visualizar consulta
 -”/adm/listar/consultas”
 get das consultas por medico
 -----------------------------------------------
-=======
-# petvitaliz-service
->>>>>>> 1fac139129c3fc88c1d08e952e9eae7e86aa2134
