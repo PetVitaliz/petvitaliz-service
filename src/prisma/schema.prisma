@@ -4,4 +4,126 @@ generator client {
 
 datasource db {
   provider = "mysql"
+  url = env("DATABASE_URL")
+}
+
+model administrador {
+  ADM_ID    Int    @id @default(autoincrement())
+  ADM_NOME  String @db.VarChar(500)
+  ADM_EMAIL String @db.VarChar(500)
+  ADM_SENHA String @db.VarChar(500)
+  ADM_ATIVO Int?   @db.TinyInt
+}
+
+model assinaturas {
+  id_assinatura   Int       @id @default(autoincrement())
+  id_usuario      Int
+  id_produto      Int
+  data_assinatura DateTime? @default(now()) @db.DateTime(0)
+  produtos        produtos  @relation(fields: [id_produto], references: [id_produto], onDelete: NoAction, onUpdate: NoAction, map: "assinaturas_ibfk_1")
+
+  @@index([id_produto], map: "id_produto")
+}
+
+model consulta {
+  id_consulta    Int             @id @default(autoincrement())
+  id_pet         Int
+  id_funcionario Int
+  data_consulta  DateTime        @db.Date
+  hora_inicio    DateTime        @db.Time(0)
+  hora_fim       DateTime        @db.Time(0)
+  status         consulta_status
+  observacoes    String          @db.VarChar(500)
+  funcionario    funcionario     @relation(fields: [id_funcionario], references: [id_funcionario], onDelete: NoAction, onUpdate: NoAction, map: "funcionario")
+  pet            pet             @relation(fields: [id_pet], references: [id_pet], onDelete: NoAction, onUpdate: NoAction, map: "pet")
+
+  @@index([id_funcionario], map: "funcionario")
+  @@index([id_pet], map: "pet")
+}
+
+model funcionario {
+  id_funcionario Int                       @id @default(autoincrement())
+  nome           String                    @db.VarChar(500)
+  sobrenome      String                    @db.VarChar(500)
+  especialidade  funcionario_especialidade
+  registro       String?                   @db.VarChar(500)
+  ativo          Int?                      @db.TinyInt
+  carga          Int
+  senha          String                    @db.VarChar(500)
+  consulta       consulta[]
+}
+
+model pet {
+  id_pet          Int         @id @default(autoincrement())
+  id_usuario      Int
+  nome            String      @db.VarChar(500)
+  especie         pet_especie
+  sexo            pet_sexo
+  data_nascimento DateTime    @db.Date
+  consulta        consulta[]
+  usuario         usuario     @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "dono")
+
+  @@index([id_usuario], map: "dono")
+}
+
+model produtos {
+  id_produto  Int           @id @default(autoincrement())
+  nome        String        @db.VarChar(255)
+  descricao   String        @db.Text
+  beneficios  String?       @db.Text
+  preco       Decimal       @db.Decimal(10, 2)
+  assinaturas assinaturas[]
+}
+
+model reset_senha {
+  id         Int      @id @default(autoincrement())
+  id_usuario Int
+  token      String   @db.VarChar(255)
+  expira_em  DateTime @db.DateTime(0)
+  usuario    usuario  @relation(fields: [id_usuario], references: [id_usuario], onDelete: Cascade, onUpdate: NoAction, map: "usuario_reset")
+
+  @@index([id_usuario], map: "usuario_reset")
+}
+
+model usuario {
+  id_usuario      Int            @id @default(autoincrement())
+  nome            String         @db.VarChar(500)
+  sobrenome       String         @db.VarChar(500)
+  genero          usuario_genero
+  email           String         @db.VarChar(500)
+  senha           String         @db.VarChar(500)
+  telefone        String         @db.VarChar(500)
+  data_nascimento DateTime       @db.Date
+  CPF             String         @unique(map: "CPF") @db.VarChar(11)
+  pet             pet[]
+  reset_senha     reset_senha[]
+
+  @@index([CPF], map: "CPF_2")
+}
+
+enum pet_especie {
+  cachorro
+  gato
+}
+
+enum funcionario_especialidade {
+  Veterinario
+  Tosador
+}
+
+enum usuario_genero {
+  M
+  F
+  O
+}
+
+enum pet_sexo {
+  M
+  F
+}
+
+enum consulta_status {
+  em_espera    @map("em espera")
+  em_endamento @map("em endamento")
+  finalizado
 }
