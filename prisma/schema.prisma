@@ -90,7 +90,7 @@ model usuario {
   nome            String         @db.VarChar(500)
   sobrenome       String         @db.VarChar(500)
   genero          usuario_genero
-  email           String         @db.VarChar(500)
+  email           String         @unique@db.VarChar(500)
   senha           String         @db.VarChar(500)
   telefone        String         @db.VarChar(500)
   data_nascimento DateTime       @db.Date
