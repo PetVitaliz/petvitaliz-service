@@ -18,14 +18,6 @@ app.use("/user", authRoutes)
 app.use("/", homeRoutes)
 
 
-app.get("/status", async (req, res) => {
-    try {
-        const teste = await prisma.$connect()
-        return res.status(200).send("ok")
-    } catch (error) {
-        return res.status(503).send("n ok")
-    }
-})
 
 app.listen(Port, () => {
     console.log(`API rodando na porta ${Port}`);
