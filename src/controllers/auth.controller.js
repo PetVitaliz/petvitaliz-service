@@ -35,9 +35,9 @@ export async function cadastro(req, res) {
         return res.status(400).send("genero é obrigatorio e deve ser 'f', 'm' ou 'o' ")
     }
 
-    if(!data_nascimento || typeof data_nascimento != "string"){
-        return res.status(400).send("data de nascimento é obrigatorio e precisa ser ano-mes-dia")
-    }    
+        if(!data_nascimento || typeof data_nascimento != "string"){
+            return res.status(400).send("data de nascimento é obrigatorio e precisa ser ano-mes-dia")
+        }    
 
     const existing = await prisma.usuario.findUnique({
         where: { email: email.trim().toLowerCase() }
