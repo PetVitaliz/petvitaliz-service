@@ -23,10 +23,16 @@ app.get("/health", async (req, res) => {
         await prisma.$connect()
         await prisma.$queryRaw`SELECT 1`
         
-        return res.status(200).send("Banco conectado")
+        return res.status(200).send({
+            API: "Rodando",
+            DB: "ON"
+        })
     } catch (error) {
         
-        return res.status(503).send("Banco não conectado")
+        return res.status(503).send({
+            API: "Rodando",
+            DB: "OFF"
+        })
     }
 })
 
