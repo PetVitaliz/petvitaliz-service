@@ -14,8 +14,8 @@ LOGIN
 PET
 
 {
-  "nome": "Alpha",
-  "especie": "CACHORRO",
-  "sexo": "m",
-  "data_nascimento": "2020-06-29"
+  "nome": "",
+  "especie": "",
+  "sexo": "",
+  "data_nascimento": ""
 }
