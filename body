@@ -1,3 +1,5 @@
+LOGIN
+
 {
   "nome": "",
   "sobrenome": "",
@@ -7,4 +9,13 @@
   "telefone": "",
   "data_nascimento": "",
   "CPF": ""
+}
+
+PET
+
+{
+  "nome": "Alpha",
+  "especie": "CACHORRO",
+  "sexo": "m",
+  "data_nascimento": "2020-06-29"
 }
