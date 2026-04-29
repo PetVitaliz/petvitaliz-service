@@ -66,6 +66,25 @@ export async function cadastrar_pet_n_logada(req, res) {
     })
 }
 
+// Editar Pet
+
+export async function editar_pet_n_logada(req, res) {
+    return res.status(200).send({
+        pagina: "Pagina de editar pet",
+        versão: "não logada", 
+        aviso: "faça login para utilizar esse recurso"
+    })
+}
+
+// Excluir Pet
+
+export async function excluir_pet_n_logada(req, res) {
+    return res.status(200).send({
+        pagina: "Pagina de excluir pet",
+        versão: "não logada", 
+        aviso: "faça login para utilizar esse recurso"
+    })
+}
 
 // Agendamento
 
@@ -114,7 +133,7 @@ export async function contato(req, res) {
 
     return res.status(200).send({
         mensagem: "Pagina de contato",
-        versão: "não logada"
+        usuario: `${nome} ${sobrenome}`
     })
 }
 
@@ -126,15 +145,124 @@ export async function servicos_emergencia(req, res) {
 
     return res.status(200).send({
         mensagem: "Pagina de serviços de emergencia",
-        versão: "não logada"
+        usuario: `${nome} ${sobrenome}`
     })
 }
 
+// Lista dos pets (logado)
+
+export async function listar_pet(req, res) {
+    const { nome, sobrenome } = req.usuarioLogado;
+    const id_usuario = Number(req.usuarioLogado.id)
+    
+
+    const pets = await prisma.pet.findMany({
+        where: { id_usuario: id_usuario },
+        select: {
+            nome: true,
+            especie: true,
+            sexo: true,
+            data_nascimento: true
+        }
+    })
+
+    return res.status(200).send({
+        mensagem: "Pagina de listar pet",
+        usuario: `${nome} ${sobrenome}`,
+        Pets: pets
+    })
+}
 
 // Cadastrar pet (logado)
 
-export async function cadastrar_pet() {
-    const { nome, sobrenome } = req.usuarioLogado;
+export async function cadastrar_pet(req, res) {
+    const { nome, especie, sexo, data_nascimento } = req.body
+    const id_usuario = req.usuarioLogado.id
+    
 
+    if (!nome || typeof nome !== "string"){
+        return res.status(400).send("nome do pet é obrigatorio")
+    }
+
+    if (!especie || typeof especie !== "string" || (especie !== "cachorro" && especie !== "gato" && especie !== "CACHORRO" && especie !== "GATO")) {
+        return res.status(400).send("especie é obrigatorio, só atendemos 'cachorro' ou 'gato' no momento")
+    }
+
+    if(!sexo || typeof sexo !== "string" || (sexo !== "m" && sexo !== "f" && sexo !== "M" && sexo !== "F")){
+        return res.status(400).send("genero é obrigatorio e deve ser 'm' ou 'f' ")
+    }
+
+    if(!data_nascimento || typeof data_nascimento != "string"){
+        return res.status(400).send("data de nascimento é obrigatorio e precisa ser ano-mes-dia")
+    }
+
+    const pet = await prisma.pet.create({
+        data: {
+            nome: nome.trim(),
+            especie: especie.trim().toLowerCase(),
+            sexo: sexo.trim().toUpperCase(),
+            data_nascimento: new Date(data_nascimento.trim()),
+            usuario: {
+                connect: {id_usuario: Number(id_usuario)}
+            }
+        }
+    })
+
+    return res.status(201).send({
+        mensagem: "Pet cadastrado com sucesso"
+    })
 }
 
+// Editar pet (logado)
+
+export async function editar_pet(req, res) {
+    const id_pet = Number(req.params.id)
+    const { nome, especie, sexo, data_nascimento } = req.body
+    
+    if (!nome || typeof nome !== "string"){
+        return res.status(400).send("nome do pet é obrigatorio")
+    }
+
+    const especieFormatada = especie.toLowerCase();
+    if (!especieFormatada || typeof especieFormatada !== "string" || (especieFormatada !== "cachorro" && especieFormatada !== "gato")) {
+        return res.status(400).send("especie é obrigatorio, só atendemos 'cachorro' ou 'gato' no momento")
+    }
+
+    const sexoFormatado = sexo.toLowerCase();
+    if(!sexoFormatado || typeof sexoFormatado !== "string" || (sexoFormatado !== "m" && sexoFormatado !== "f")){
+        return res.status(400).send("genero é obrigatorio e deve ser 'm' ou 'f' ")
+    }
+
+    if(!data_nascimento || typeof data_nascimento != "string"){
+        return res.status(400).send("data de nascimento é obrigatorio e precisa ser ano-mes-dia")
+    }
+
+    const novoPet = await prisma.pet.update({
+        where: { id_pet: id_pet },
+        data: {
+            nome: nome.trim(),
+            especie: especieFormatada.trim(),
+            sexo: sexoFormatado.trim().toUpperCase(),
+            data_nascimento: new Date(data_nascimento.trim()),
+        }
+    })
+
+    const rows = novoPet
+    return res.status(200).send({
+        pet: rows
+    })
+}
+
+// Excluir pet (logado)
+
+export async function excluir_pet(req, res) {
+    const id_pet = Number(req.params.id)
+
+    const deletarPet = await prisma.pet.delete({
+        where: { id_pet: id_pet }
+    })
+
+    return res.status(200).send({
+        mensagem: "Pet deletado com sucesso"
+    })
+}
