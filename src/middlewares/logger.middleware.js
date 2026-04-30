@@ -20,3 +20,19 @@ export async function verificarToken(req, res, next) {
         return res.status(403).json({ message: "Sessão expirada, faça login novamente" });
     }
 }
+
+export async function verificarTokenReset(req, res, next) {
+    const token = req.cookies.token_reset;
+
+    if (!token) {
+        return res.status(401).json({ message: "Acesso negado" });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.usuarioPermitido = decoded;
+        next();
+    } catch (error) {
+        return res.status(403).json({ message: "Sessão expirada, peça um codigo novamente" });
+    }
+}

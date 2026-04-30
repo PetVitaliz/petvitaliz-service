@@ -1,6 +1,8 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { prisma } from '../lib/prisma.js'
+import otpGenerator from 'otp-generator';
+import { emailReset_Enviado } from '../lib/email.js';
 
 // CADASTRO USER
 export async function cadastro(req, res) {
@@ -131,4 +133,120 @@ export async function logout_user(req, res) {
         .clearCookie('token') 
         .status(200)
         .json({ message: "Logout realizado com sucesso!" });
+}
+
+// RESET SENHA USUARIO
+
+export async function pedir_reset_senha(req, res) {
+    const { email } = req.body
+
+    try {
+        const existing = await prisma.usuario.findUnique({
+            where: { email: email }
+        })
+    
+        if (!existing) {
+            return res.status(404).send({
+                mensagem: "email não encontrado"
+            })
+        }
+    
+        const codigo = otpGenerator.generate(6, {
+            upperCaseAlphabets: false,
+            specialChars: false,
+            lowerCaseAlphabets: false
+        })
+        const expira = new Date(Date.now() + 10 * 60 * 1000)
+    
+        await prisma.reset_senha.create({
+            data: {
+                id_usuario: existing.id_usuario,
+                token: codigo,
+                expira_em: expira
+            }
+        })
+    
+        await emailReset_Enviado(existing.nome, existing.sobrenome, email, codigo)
+    
+        return res.status(200).send({
+            mensagem: "Codigo de reset de senha enviado para o email"
+        })
+
+    } catch (error) {
+        console.log("Erro no reset_senha:", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
+    }
+}
+
+export async function confirmar_codigo(req, res) {
+    const { codigo } = req.body
+
+    try {
+        const existing = await prisma.reset_senha.findFirst({
+            where: {
+                token: codigo,
+                expira_em: { gt: new Date() }
+            },
+            include: { usuario: true }
+            
+        })
+    
+        if (!existing) {
+            return res.status(404).send({
+                mensagem: "Codigo invalido"
+            })
+        }
+
+        const usuario = existing.usuario
+
+        const reset_senha_token = jwt.sign(
+            {
+                id: usuario.id_usuario,
+                reset_autorizado: true  
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '9m' }
+        )
+
+        await prisma.reset_senha.delete({
+            where: { id_reset_senha: existing.id_reset_senha }
+        });
+
+        return res.status(200).cookie('token_reset', reset_senha_token,{
+            httpOnly: true,
+            secure: false,
+            maxAge: 9 * 60 * 1000
+        }).send({
+            mensagem: "Acesso liberado",
+            token: reset_senha_token
+        })
+
+    } catch (error) {
+        console.log("Erro no reset_senha:", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
+    }
+}
+
+export async function reset_senha(req, res) {
+    const { senha1, senha2 } = req.body
+
+    try {
+        if (!senha1 || senha1.length < 6 || typeof senha1 !== "string") {
+            return res.status(400).send("A senha deve  ter pelo menos 6 caracteres e não pode estar vazia")
+        }
+
+        if (!senha2 || senha2.length < 6 || typeof senha2 !== "string") {
+            return res.status(400).send("A senha deve  ter pelo menos 6 caracteres e não pode estar vazia")
+        }
+
+        if (senha1 !== senha2) {
+            return res.status(400).send("As senhas não estão iguais")
+        }
+    } catch (error) {
+        
+    }
 }
