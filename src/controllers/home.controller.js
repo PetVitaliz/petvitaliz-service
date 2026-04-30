@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { prisma } from '../lib/prisma.js'
+import { emailContatoEnviado } from '../lib/email.js'
 
 // PARTE NAO LOGADA
 
@@ -30,7 +31,8 @@ export async function servicos_n_logado(req, res) {
 export async function contato_n_logada(req, res) {
     return res.status(200).send({
         pagina: "Pagina de contato",
-        versão: "não logada"
+        versão: "não logada",
+        aviso: "faça login para utilizar esse recurso"
     })
 }
 
@@ -130,11 +132,30 @@ export async function servicos(req, res) {
 
 export async function contato(req, res) {
     const { nome, sobrenome } = req.usuarioLogado;
+    const { email, mensagem } = req.body
+    
+    if (!email || typeof email !== "string"){
+        return res.status(400).send("email é obrigatorio")
+    }
 
-    return res.status(200).send({
-        mensagem: "Pagina de contato",
-        usuario: `${nome} ${sobrenome}`
-    })
+    if(!mensagem || typeof mensagem !== "string" || mensagem.length < 6){
+        return res.status(400).send("mensagem é obrigatorio e precisa ter pelo menos 6 caracteres")
+    }
+
+    try {
+        await emailContatoEnviado(nome, sobrenome, email, mensagem)
+
+        return res.status(200).send({
+            mensagem: "Email enviado com sucesso"
+        })
+
+    } catch (error) {
+        return res.status(500).send({
+            mensagem: "Erro ao processar o email"
+        })
+    }
+    
+    
 }
 
 
