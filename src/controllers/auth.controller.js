@@ -20,7 +20,7 @@ export async function cadastro(req, res) {
         return res.status(400).send("email é obrigatorio")
     }
 
-    if(!senha || typeof senha !== "string" || senha < 6){
+    if(!senha || typeof senha !== "string" || senha.length < 6){
         return res.status(400).send("senha é obrigatoria e deve ter pelo menos 6 caracteres")
     }
 
@@ -85,7 +85,7 @@ export async function login_usuario(req, res) {
             return res.status(400).send("email é obrigatorio")
         }
     
-        if(!senha || typeof senha !== "string" || senha < 6){
+        if(!senha || typeof senha !== "string" || senha.length < 6){
             return res.status(400).send("senha é obrigatorio e deve ter pelo menos 6 caracteres")
         }
     
@@ -125,7 +125,7 @@ export async function login_usuario(req, res) {
             message: "Login realizado com sucesso"
         })
     } catch (error) {
-        console.error("erro ao logar com o usuario", error);
+        console.error("erro ao logar como usuario", error);
         return res.status(500).send({
             mensagem: "Erro interno do servidor"
         })
@@ -142,7 +142,7 @@ export async function login_adm(req, res) {
             return res.status(400).send("user é obrigatorio")
         }
     
-        if(!senha || typeof senha !== "string" || senha < 6){
+        if(!senha || typeof senha !== "string" || senha.length < 6){
             return res.status(400).send("senha é obrigatorio e deve ter pelo menos 6 caracteres")
         }
     
@@ -194,7 +194,7 @@ export async function login_adm(req, res) {
             mensagem: "Login realizado com sucesso"
         })
     } catch (error) {
-        console.error("erro ao logar com adm", error);
+        console.error("erro ao logar como adm", error);
         return res.status(500).send({
             mensagem: "Erro interno do servidor"
         })
@@ -204,16 +204,70 @@ export async function login_adm(req, res) {
 // LOGIN FUNCIONARIO
 
 export async function login_funcionario(req, res) {
+    const {registro, senha} = req.body
+
+    try {
+        if (!registro || typeof registro !== "string"){
+            return res.status(400).send("registro é obrigatorio")
+        }
     
+        if(!senha || typeof senha !== "string" || senha.length < 6){
+            return res.status(400).send("senha é obrigatorio e deve ter pelo menos 6 caracteres")
+        }
+    
+        const funcionario = await prisma.funcionario.findUnique({
+            where: { registro: registro.trim().toLowerCase() }
+        })
+    
+        if (!funcionario) {
+            return res.status(401).send({
+                message: "email invalido"
+            })
+        }
+    
+        const igual = await bcrypt.compare(senha, funcionario.senha)
+    
+        if (!igual) {
+            return res.status(401).send({
+                message: "senha invalido"
+            })
+        }
+    
+        const token_funcionario = jwt.sign(
+            { id: funcionario.id_funcionario,
+             email: funcionario.email, 
+             nome: funcionario.nome,
+             sobrenome: funcionario.sobrenome,
+             registro: funcionario.registro,
+             ativo: funcionario.registro,
+             carga: funcionario.carga,
+             especialidade: funcionario.especialidade,
+             role: "FUNCIONARIO" },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        )
+    
+        return res.status(200).cookie('token', token_funcionario, {
+            httpOnly: true,
+            secure: false,
+            maxAge: 60 * 60 * 1000
+         }).json({
+            message: "Login realizado com sucesso"
+        })
+    } catch (error) {
+        console.error("erro ao logar como funcionario", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
+    }
 }
 
-// LOGOUT USER
+// LOGOUT
 
-export async function logout_user(req, res) {
-    return res
-        .clearCookie('token') 
-        .status(200)
-        .json({ message: "Logout realizado com sucesso!" });
+export async function logout(req, res) {
+    return res.clearCookie('token') .status(200).send({
+        message: "Logout realizado com sucesso"
+    });
 }
 
 // RESET SENHA USUARIO
@@ -260,6 +314,8 @@ export async function pedir_reset_senha(req, res) {
         })
     }
 }
+
+// CONFIRMAR CODIGO OTP
 
 export async function confirmar_codigo(req, res) {
     const { codigo } = req.body
@@ -310,6 +366,8 @@ export async function confirmar_codigo(req, res) {
         })
     }
 }
+
+// ALTERAR SENHA
 
 export async function reset_senha(req, res) {
     const { senha1, senha2 } = req.body
