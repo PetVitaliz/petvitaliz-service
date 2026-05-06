@@ -6,6 +6,8 @@ import { prisma } from './lib/prisma.js'
 import { logger } from './middlewares/logger.middleware.js'
 import authRoutes from './routes/auth.routes.js'
 import homeRoutes from './routes/home.routes.js'
+import admRoutes from './routes/adm.routes.js'
+import funcionarioRoutes from './routes/funcionario.routes.js'
 
 const app = express()
 const Port = 3000
@@ -17,6 +19,8 @@ app.use(cookieParser())
 
 app.use("/user", authRoutes)
 app.use("/", homeRoutes)
+app.use("/adm", admRoutes)
+app.use("funcionario", funcionarioRoutes)
 
 app.get("/health", async (req, res) => {
     try {

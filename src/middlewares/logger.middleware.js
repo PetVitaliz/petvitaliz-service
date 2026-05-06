@@ -36,3 +36,7 @@ export async function verificarTokenReset(req, res, next) {
         return res.status(403).json({ message: "Sessão expirada, peça um codigo novamente" });
     }
 }
+
+export async function verificarTokenAdmin(req, res, next) {
+    
+}
