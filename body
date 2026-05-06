@@ -17,7 +17,7 @@ CADASTRAR (adm)
   "nome": "",
   "email": "",
   "senha": "",
-  "ativo": ""
+  "ativo": 
 }
 
 LOGIN (usuario)

@@ -9,10 +9,10 @@ datasource db {
 
 model administrador {
   ADM_ID    Int    @id @default(autoincrement())
-  ADM_NOME  String @db.VarChar(500)
-  ADM_EMAIL String @db.VarChar(500)
+  ADM_NOME  String @unique@db.VarChar(500)
+  ADM_EMAIL String @unique@db.VarChar(500)
   ADM_SENHA String @db.VarChar(500)
-  ADM_ATIVO Int?   @db.TinyInt
+  ADM_ATIVO Boolean @default(true)
 }
 
 model assinaturas {
