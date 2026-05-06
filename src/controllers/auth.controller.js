@@ -21,7 +21,7 @@ export async function cadastro(req, res) {
     }
 
     if(!senha || typeof senha !== "string" || senha < 6){
-        return res.status(400).send("password é obrigatorio e deve ter pelo menos 6 caracteres")
+        return res.status(400).send("senha é obrigatoria e deve ter pelo menos 6 caracteres")
     }
 
     if(!CPF || typeof CPF !== "string" || CPF.length < 11){
@@ -32,14 +32,14 @@ export async function cadastro(req, res) {
         return res.status(400).send("telefone é obrigatorio e deve ter 11 digitos")
     }
 
-
-    if(!genero || typeof genero !== "string" || (genero !== "m" && genero !== "f" && genero !== "o")){
+    const genero_lower = genero.toLowerCase()
+    if(!genero_lower || typeof genero_lower !== "string" || (genero_lower !== "m" && genero_lower !== "f" && genero_lower !== "o")){
         return res.status(400).send("genero é obrigatorio e deve ser 'f', 'm' ou 'o' ")
     }
 
-        if(!data_nascimento || typeof data_nascimento != "string"){
-            return res.status(400).send("data de nascimento é obrigatorio e precisa ser ano-mes-dia")
-        }    
+    if(!data_nascimento || typeof data_nascimento != "string"){
+        return res.status(400).send("data de nascimento é obrigatorio e precisa ser ano-mes-dia")
+    }    
 
     const existing = await prisma.usuario.findUnique({
         where: { email: email.trim().toLowerCase() }
@@ -57,7 +57,8 @@ export async function cadastro(req, res) {
         return res.status(400).send("CPF ja cadastrado")
     }
 
-    const hashedPassword = await bcrypt.hash(senha, 10)
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(senha, salt)
     
     const usuario = await prisma.usuario.create({
         data: {
@@ -65,7 +66,7 @@ export async function cadastro(req, res) {
             sobrenome: sobrenome.trim(),
             CPF: CPF.trim(),
             data_nascimento: new Date(data_nascimento.trim()),
-            genero: genero.trim().toUpperCase(),
+            genero: genero_lower.trim().toUpperCase(),
             telefone: telefone.trim(),
             email: email.trim().toLowerCase(),
             senha: hashedPassword
@@ -79,52 +80,132 @@ export async function cadastro(req, res) {
 export async function login_usuario(req, res) {
     const {email, senha} = req.body
 
-    if (!email || typeof email !== "string"){
-        return res.status(400).send("email é obrigatorio")
-    }
-
-    if(!senha || typeof senha !== "string" || senha < 6){
-        return res.status(400).send("senha é obrigatorio e deve ter pelo menos 6 caracteres")
-    }
-
-    const usuario = await prisma.usuario.findUnique({
-        where: { email: email.trim().toLowerCase() }
-    })
-
-    if (!usuario) {
-        return res.status(401).send({
-            message: "email invalido"
+    try {
+        if (!email || typeof email !== "string"){
+            return res.status(400).send("email é obrigatorio")
+        }
+    
+        if(!senha || typeof senha !== "string" || senha < 6){
+            return res.status(400).send("senha é obrigatorio e deve ter pelo menos 6 caracteres")
+        }
+    
+        const usuario = await prisma.usuario.findUnique({
+            where: { email: email.trim().toLowerCase() }
+        })
+    
+        if (!usuario) {
+            return res.status(401).send({
+                message: "email invalido"
+            })
+        }
+    
+        const igual = await bcrypt.compare(senha, usuario.senha)
+    
+        if (!igual) {
+            return res.status(401).send({
+                message: "senha invalido"
+            })
+        }
+    
+        const token_user = jwt.sign(
+            { id: usuario.id_usuario,
+             email: usuario.email, 
+             nome: usuario.nome,
+             sobrenome: usuario.sobrenome,
+             role: "USUARIO" },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        )
+    
+        return res.status(200).cookie('token', token_user, {
+            httpOnly: true,
+            secure: false,
+            maxAge: 60 * 60 * 1000
+         }).json({
+            message: "Login realizado com sucesso"
+        })
+    } catch (error) {
+        console.error("erro ao logar com o usuario", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
         })
     }
-
-    const igual = await bcrypt.compare(senha, usuario.senha)
-
-    if (!igual) {
-        return res.status(401).send({
-            message: "senha invalido"
-        })
-    }
-
-    const token_user = jwt.sign(
-        { id: usuario.id_usuario,
-         email: usuario.email, 
-         nome: usuario.nome,
-         sobrenome: usuario.sobrenome,
-         role: "USUARIO" },
-        process.env.JWT_SECRET,
-        { expiresIn: '1h' }
-    )
-
-    return res.status(200).cookie('token', token_user, {
-        httpOnly: true,
-        secure: false,
-        maxAge: 60 * 60 * 1000
-     }).json({
-        message: "Login realizado com sucesso", 
-        token: token_user
-    })
 }
 
+// LOGIN ADM
+
+export async function login_adm(req, res) {
+    const { user, senha } = req.body
+
+    try {
+        if (!user || typeof user !== "string"){
+            return res.status(400).send("user é obrigatorio")
+        }
+    
+        if(!senha || typeof senha !== "string" || senha < 6){
+            return res.status(400).send("senha é obrigatorio e deve ter pelo menos 6 caracteres")
+        }
+    
+        const administrador = await prisma.administrador.findUnique({
+            where: { ADM_NOME: user.trim() }
+        })
+    
+        if (!administrador) {
+            return res.status(401).send({
+                message: "user invalido"
+            })
+        }
+    
+        const igual = await bcrypt.compare(senha, administrador.ADM_SENHA)
+    
+        if (!igual) {
+            return res.status(401).send({
+                mensagem: "senha invalida"
+            })
+        }
+
+        const ativo = await prisma.administrador.findUnique({
+            where: { ADM_NOME: user.trim(),
+                    ADM_ATIVO: true
+             }
+        })
+        
+        if (!ativo) {
+            return res.send(401).send({
+                mensagem: "usuario não esta mais ativo"
+            })    
+        }
+
+        const token_adm = jwt.sign(
+            { id: administrador.ADM_ID,
+            email: administrador.ADM_EMAIL,
+            nome: administrador.ADM_NOME,
+            ativo: administrador.ADM_ATIVO,
+            role: "ADMINISTRADOR" },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        )
+    
+        return res.status(200).cookie('token', token_adm, {
+            httpOnly: true,
+            secure: false,
+            maxAge: 60 * 60 * 1000
+        }).send({
+            mensagem: "Login realizado com sucesso"
+        })
+    } catch (error) {
+        console.error("erro ao logar com adm", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
+    }
+}
+
+// LOGIN FUNCIONARIO
+
+export async function login_funcionario(req, res) {
+    
+}
 
 // LOGOUT USER
 
@@ -211,7 +292,7 @@ export async function confirmar_codigo(req, res) {
         )
 
         await prisma.reset_senha.delete({
-            where: { id_reset_senha: existing.id_reset_senha }
+            where: { id: existing.id }
         });
 
         return res.status(200).cookie('token_reset', reset_senha_token,{
@@ -219,8 +300,7 @@ export async function confirmar_codigo(req, res) {
             secure: false,
             maxAge: 9 * 60 * 1000
         }).send({
-            mensagem: "Acesso liberado",
-            token: reset_senha_token
+            mensagem: "Acesso liberado"
         })
 
     } catch (error) {
@@ -233,6 +313,7 @@ export async function confirmar_codigo(req, res) {
 
 export async function reset_senha(req, res) {
     const { senha1, senha2 } = req.body
+    const id_usuario = req.usuarioPermitido.id
 
     try {
         if (!senha1 || senha1.length < 6 || typeof senha1 !== "string") {
@@ -246,7 +327,22 @@ export async function reset_senha(req, res) {
         if (senha1 !== senha2) {
             return res.status(400).send("As senhas não estão iguais")
         }
+
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(senha1, salt)
+
+        await prisma.usuario.update({
+            where: { id_usuario: id_usuario },
+            data: { senha: hashedPassword }
+        })
+
+        return res.clearCookie('token_reset').status(200).send({
+            mensagem: "Senha alterado com sucesso"
+        })
     } catch (error) {
-        
+        console.error("erro ao atualizar a senha", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
     }
 }

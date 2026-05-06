@@ -1,4 +1,4 @@
-LOGIN
+CADASTRO (usuario)
 
 {
   "nome": "",
@@ -11,7 +11,30 @@ LOGIN
   "CPF": ""
 }
 
-PET
+CADASTRAR (adm)
+
+{
+  "nome": "",
+  "email": "",
+  "senha": "",
+  "ativo": ""
+}
+
+LOGIN (usuario)
+
+{
+  "email": "",
+  "senha": ""
+}
+
+LOGIN (adm)
+
+{
+  "user": "",
+  "senha": ""
+}
+
+CADASTRAR PET
 
 {
   "nome": "",
@@ -25,4 +48,23 @@ CONTATO
 {
   "email": "",
   "mensagem": ""
+}
+
+RESET SENHA
+
+{
+  "email": ""
+}
+
+CONFIRMAR CODIGO
+
+{
+  "codigo": "868211"
+}
+
+ALTERNAR SENHA
+
+{
+  "senha1": "",
+  "senha2": ""
 }

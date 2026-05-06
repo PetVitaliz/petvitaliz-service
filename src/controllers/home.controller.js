@@ -209,7 +209,8 @@ export async function cadastrar_pet(req, res) {
         return res.status(400).send("especie é obrigatorio, só atendemos 'cachorro' ou 'gato' no momento")
     }
 
-    if(!sexo || typeof sexo !== "string" || (sexo !== "m" && sexo !== "f" && sexo !== "M" && sexo !== "F")){
+    const sexo_lower = sexo.toLowerCase()
+    if(!sexo_lower || typeof sexo_lower !== "string" || (sexo_lower !== "m" && sexo_lower !== "f")){
         return res.status(400).send("genero é obrigatorio e deve ser 'm' ou 'f' ")
     }
 
@@ -221,7 +222,7 @@ export async function cadastrar_pet(req, res) {
         data: {
             nome: nome.trim(),
             especie: especie.trim().toLowerCase(),
-            sexo: sexo.trim().toUpperCase(),
+            sexo: sexo_lower.trim().toUpperCase(),
             data_nascimento: new Date(data_nascimento.trim()),
             usuario: {
                 connect: {id_usuario: Number(id_usuario)}
@@ -249,8 +250,8 @@ export async function editar_pet(req, res) {
         return res.status(400).send("especie é obrigatorio, só atendemos 'cachorro' ou 'gato' no momento")
     }
 
-    const sexoFormatado = sexo.toLowerCase();
-    if(!sexoFormatado || typeof sexoFormatado !== "string" || (sexoFormatado !== "m" && sexoFormatado !== "f")){
+    const sexo_lower = sexo.toLowerCase();
+    if(!sexo_lower || typeof sexo_lower !== "string" || (sexo_lower !== "m" && sexo_lower !== "f")){
         return res.status(400).send("genero é obrigatorio e deve ser 'm' ou 'f' ")
     }
 
@@ -263,7 +264,7 @@ export async function editar_pet(req, res) {
         data: {
             nome: nome.trim(),
             especie: especieFormatada.trim(),
-            sexo: sexoFormatado.trim().toUpperCase(),
+            sexo: sexo_lower.trim().toUpperCase(),
             data_nascimento: new Date(data_nascimento.trim()),
         }
     })
