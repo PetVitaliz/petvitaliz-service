@@ -14,7 +14,7 @@ CADASTRO (usuario)
 CADASTRAR (adm)
 
 {
-  "nome": "",
+  "username": "",
   "email": "",
   "senha": "",
   "ativo": 

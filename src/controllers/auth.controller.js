@@ -171,7 +171,7 @@ export async function login_adm(req, res) {
         })
         
         if (!ativo) {
-            return res.send(401).send({
+            return res.status(401).send({
                 mensagem: "usuario não esta mais ativo"
             })    
         }
@@ -186,12 +186,12 @@ export async function login_adm(req, res) {
             { expiresIn: '1h' }
         )
     
-        return res.status(200).cookie('token', token_adm, {
+        return res.status(200).cookie('token_adm', token_adm, {
             httpOnly: true,
             secure: false,
             maxAge: 60 * 60 * 1000
         }).send({
-            mensagem: "Login realizado com sucesso"
+            mensagem: "Login realizado ADM com sucesso"
         })
     } catch (error) {
         console.error("erro ao logar como adm", error);
@@ -247,7 +247,7 @@ export async function login_funcionario(req, res) {
             { expiresIn: '1h' }
         )
     
-        return res.status(200).cookie('token', token_funcionario, {
+        return res.status(200).cookie('token_funcionario', token_funcionario, {
             httpOnly: true,
             secure: false,
             maxAge: 60 * 60 * 1000
