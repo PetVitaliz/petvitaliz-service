@@ -1,0 +1,1211 @@
+{
+  "info": {
+    "_postman_id": "13cba64c-fd9c-4538-9988-7e0bb4ad7e64",
+    "name": "Minha API",
+    "description": "Documentação da API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "54598423",
+    "_collection_link": "https://go.postman.co/collection/54598423-13cba64c-fd9c-4538-9988-7e0bb4ad7e64?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "adm",
+      "item": [
+        {
+          "name": "logout",
+          "item": [
+            {
+              "name": "Realiza logout do administrador",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/adm/logout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "adm",
+                    "logout"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "Logout realizado com sucesso",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/adm/logout",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "adm",
+                        "logout"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "text",
+                  "header": [],
+                  "cookie": [],
+                  "body": null
+                },
+                {
+                  "name": "Token inválido",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/adm/logout",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "adm",
+                        "logout"
+                      ]
+                    }
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "_postman_previewlanguage": "text",
+                  "header": [],
+                  "cookie": [],
+                  "body": null
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "listar",
+          "item": [
+            {
+              "name": "adm",
+              "item": [
+                {
+                  "name": "cadastrar",
+                  "item": [
+                    {
+                      "name": "debug",
+                      "item": [
+                        {
+                          "name": "Cadastra administrador sem autenticação para debug",
+                          "request": {
+                            "method": "POST",
+                            "header": [],
+                            "url": {
+                              "raw": "{{baseUrl}}/adm/listar/adm/cadastrar/debug",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "adm",
+                                "listar",
+                                "adm",
+                                "cadastrar",
+                                "debug"
+                              ]
+                            }
+                          },
+                          "response": [
+                            {
+                              "name": "Administrador cadastrado com sucesso",
+                              "originalRequest": {
+                                "method": "POST",
+                                "header": [],
+                                "url": {
+                                  "raw": "{{baseUrl}}/adm/listar/adm/cadastrar/debug",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "adm",
+                                    "listar",
+                                    "adm",
+                                    "cadastrar",
+                                    "debug"
+                                  ]
+                                }
+                              },
+                              "status": "Created",
+                              "code": 201,
+                              "_postman_previewlanguage": "text",
+                              "header": [],
+                              "cookie": [],
+                              "body": null
+                            },
+                            {
+                              "name": "Dados inválidos",
+                              "originalRequest": {
+                                "method": "POST",
+                                "header": [],
+                                "url": {
+                                  "raw": "{{baseUrl}}/adm/listar/adm/cadastrar/debug",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "adm",
+                                    "listar",
+                                    "adm",
+                                    "cadastrar",
+                                    "debug"
+                                  ]
+                                }
+                              },
+                              "status": "Bad Request",
+                              "code": 400,
+                              "_postman_previewlanguage": "text",
+                              "header": [],
+                              "cookie": [],
+                              "body": null
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Cadastra um novo administrador",
+                      "request": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"username\": \"string\",\n  \"email\": \"string\",\n  \"senha\": \"string\",\n  \"ativo\": false\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/adm/listar/adm/cadastrar",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "adm",
+                            "listar",
+                            "adm",
+                            "cadastrar"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "Administrador cadastrado com sucesso",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"username\": \"string\",\n  \"email\": \"string\",\n  \"senha\": \"string\",\n  \"ativo\": false\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/adm/listar/adm/cadastrar",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "adm",
+                                "listar",
+                                "adm",
+                                "cadastrar"
+                              ]
+                            }
+                          },
+                          "status": "Created",
+                          "code": 201,
+                          "_postman_previewlanguage": "text",
+                          "header": [],
+                          "cookie": [],
+                          "body": null
+                        },
+                        {
+                          "name": "Dados inválidos",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"username\": \"string\",\n  \"email\": \"string\",\n  \"senha\": \"string\",\n  \"ativo\": false\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/adm/listar/adm/cadastrar",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "adm",
+                                "listar",
+                                "adm",
+                                "cadastrar"
+                              ]
+                            }
+                          },
+                          "status": "Bad Request",
+                          "code": 400,
+                          "_postman_previewlanguage": "text",
+                          "header": [],
+                          "cookie": [],
+                          "body": null
+                        },
+                        {
+                          "name": "Acesso não autorizado",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"username\": \"string\",\n  \"email\": \"string\",\n  \"senha\": \"string\",\n  \"ativo\": false\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/adm/listar/adm/cadastrar",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "adm",
+                                "listar",
+                                "adm",
+                                "cadastrar"
+                              ]
+                            }
+                          },
+                          "status": "Unauthorized",
+                          "code": 401,
+                          "_postman_previewlanguage": "text",
+                          "header": [],
+                          "cookie": [],
+                          "body": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Acessa a área principal do administrador",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/adm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "adm"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Acesso autorizado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/adm",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "adm"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [],
+              "cookie": [],
+              "body": null
+            },
+            {
+              "name": "Token inválido ou acesso negado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/adm",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "adm"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "text",
+              "header": [],
+              "cookie": [],
+              "body": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "cadastro",
+          "item": [
+            {
+              "name": "Cadastra um novo usuário",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nome\": \"string\",\n  \"sobrenome\": \"string\",\n  \"email\": \"string\",\n  \"CPF\": \"string\",\n  \"telefone\": \"string\",\n  \"genero\": \"string\",\n  \"data_nascimento\": \"string\",\n  \"senha\": \"string\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/cadastro",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "cadastro"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "Usuário cadastrado com sucesso",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"nome\": \"string\",\n  \"sobrenome\": \"string\",\n  \"email\": \"string\",\n  \"CPF\": \"string\",\n  \"telefone\": \"string\",\n  \"genero\": \"string\",\n  \"data_nascimento\": \"string\",\n  \"senha\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/cadastro",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "cadastro"
+                      ]
+                    }
+                  },
+                  "status": "Created",
+                  "code": 201,
+                  "_postman_previewlanguage": "text",
+                  "header": [],
+                  "cookie": [],
+                  "body": null
+                },
+                {
+                  "name": "Dados inválidos",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"nome\": \"string\",\n  \"sobrenome\": \"string\",\n  \"email\": \"string\",\n  \"CPF\": \"string\",\n  \"telefone\": \"string\",\n  \"genero\": \"string\",\n  \"data_nascimento\": \"string\",\n  \"senha\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/cadastro",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "cadastro"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "text",
+                  "header": [],
+                  "cookie": [],
+                  "body": null
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "login",
+          "item": [
+            {
+              "name": "Realiza login do usuário",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"string\",\n  \"senha\": \"string\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "Login realizado com sucesso",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"string\",\n  \"senha\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/login",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "login"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "text",
+                  "header": [],
+                  "cookie": [],
+                  "body": null
+                },
+                {
+                  "name": "Credenciais inválidas",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"string\",\n  \"senha\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/login",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "login"
+                      ]
+                    }
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "_postman_previewlanguage": "text",
+                  "header": [],
+                  "cookie": [],
+                  "body": null
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "logout",
+          "item": [
+            {
+              "name": "Realiza logout do usuário autenticado",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/logout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "logout"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "Logout realizado com sucesso",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/logout",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "logout"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "text",
+                  "header": [],
+                  "cookie": [],
+                  "body": null
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "/",
+      "item": [
+        {
+          "name": "Acessa a página inicial pública",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "user",
+      "item": [
+        {
+          "name": "home",
+          "item": [
+            {
+              "name": "Acessa a página inicial do usuário autenticado",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/user/home",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "home"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "servicos",
+          "item": [
+            {
+              "name": "Lista os serviços para usuário autenticado",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/user/servicos",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "servicos"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "contato",
+          "item": [
+            {
+              "name": "Envia mensagem de contato autenticado",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"string\",\n  \"mensagem\": \"string\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/user/contato",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "contato"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "servicos-de-emergencia",
+          "item": [
+            {
+              "name": "Lista serviços de emergência para usuário autenticado",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/user/servicos-de-emergencia",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "servicos-de-emergencia"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "cadastar",
+          "item": [
+            {
+              "name": "pet",
+              "item": [
+                {
+                  "name": "Cadastra um novo pet",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"nome\": \"string\",\n  \"especie\": \"string\",\n  \"sexo\": \"string\",\n  \"data_nascimento\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/user/cadastar/pet",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "user",
+                        "cadastar",
+                        "pet"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "listar",
+          "item": [
+            {
+              "name": "pet",
+              "item": [
+                {
+                  "name": "Lista pets do usuário autenticado",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/user/listar/pet",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "user",
+                        "listar",
+                        "pet"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "editar",
+          "item": [
+            {
+              "name": "pet",
+              "item": [
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "Atualiza informações do pet",
+                      "request": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"nome\": \"string\",\n  \"especie\": \"string\",\n  \"sexo\": \"string\",\n  \"data_nascimento\": \"string\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/user/editar/pet/:id",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "user",
+                            "editar",
+                            "pet",
+                            ":id"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id"
+                            }
+                          ]
+                        }
+                      },
+                      "response": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "delete",
+          "item": [
+            {
+              "name": "pet",
+              "item": [
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "Remove um pet cadastrado",
+                      "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                          "raw": "{{baseUrl}}/user/delete/pet/:id",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "user",
+                            "delete",
+                            "pet",
+                            ":id"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id"
+                            }
+                          ]
+                        }
+                      },
+                      "response": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "servicos",
+      "item": [
+        {
+          "name": "Lista os serviços disponíveis publicamente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/servicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "servicos"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "contato",
+      "item": [
+        {
+          "name": "Exibe informações de contato públicas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/contato",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contato"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "servicos-de-emergencia",
+      "item": [
+        {
+          "name": "Lista serviços de emergência publicamente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/servicos-de-emergencia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "servicos-de-emergencia"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "cadastar",
+      "item": [
+        {
+          "name": "pet",
+          "item": [
+            {
+              "name": "Exibe página de cadastro de pet",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/cadastar/pet",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cadastar",
+                    "pet"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "listar",
+      "item": [
+        {
+          "name": "pet",
+          "item": [
+            {
+              "name": "Lista pets publicamente",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/listar/pet",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "listar",
+                    "pet"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "editar",
+      "item": [
+        {
+          "name": "pet",
+          "item": [
+            {
+              "name": "{id}",
+              "item": [
+                {
+                  "name": "Exibe informações para edição do pet",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/editar/pet/:id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "editar",
+                        "pet",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "delete",
+      "item": [
+        {
+          "name": "pet",
+          "item": [
+            {
+              "name": "{id}",
+              "item": [
+                {
+                  "name": "Exibe informações para exclusão do pet",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/delete/pet/:id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "delete",
+                        "pet",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "agendamento",
+      "item": [
+        {
+          "name": "Exibe informações sobre agendamentos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/agendamento",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "agendamento"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    }
+  ]
+}
