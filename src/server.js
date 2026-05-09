@@ -8,6 +8,8 @@ import authRoutes from './routes/auth.routes.js'
 import homeRoutes from './routes/home.routes.js'
 import admRoutes from './routes/adm.routes.js'
 import funcionarioRoutes from './routes/funcionario.routes.js'
+import swaggerUi from 'swagger-ui-express'
+import swaggerSpec from './docs/swagger.js'
 
 const app = express()
 const Port = 3000
@@ -20,7 +22,17 @@ app.use(cookieParser())
 app.use("/user", authRoutes)
 app.use("/", homeRoutes)
 app.use("/adm", admRoutes)
-app.use("funcionario", funcionarioRoutes)
+app.use("/funcionario", funcionarioRoutes)
+
+app.use(
+    '/docs',
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec)
+)
+
+app.get('/docs-json', (req, res) => {
+    res.json(swaggerSpec)
+})
 
 app.get("/health", async (req, res) => {
     try {
