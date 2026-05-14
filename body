@@ -68,3 +68,5 @@ ALTERNAR SENHA
   "senha1": "",
   "senha2": ""
 }
+
+DATABASE_URL="mysql://root:@localhost:3306/alpha2"
