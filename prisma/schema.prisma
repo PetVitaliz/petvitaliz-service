@@ -47,8 +47,8 @@ model funcionario {
   sobrenome      String                    @db.VarChar(500)
   especialidade  funcionario_especialidade
   registro       String?                   @db.VarChar(500)
-  ativo          Int?                      @db.TinyInt
-  carga          Int
+  ativo          Boolean                   @default(true)
+  carga          Int                       @default(8)
   senha          String                    @db.VarChar(500)
   consulta       consulta[]
 }
@@ -107,8 +107,8 @@ enum pet_especie {
 }
 
 enum funcionario_especialidade {
-  Veterinario
-  Tosador
+  veterinario
+  tosador
 }
 
 enum usuario_genero {

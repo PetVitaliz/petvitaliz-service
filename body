@@ -20,6 +20,17 @@ CADASTRAR (adm)
   "ativo": 
 }
 
+CADASTRAR (funcionario)
+
+{
+  "nome": "",
+  "sobrenome": "",
+  "especialidade": "",
+  "registro": "",
+  "senha": "",
+  "ativo": true
+}
+
 LOGIN (usuario)
 
 {

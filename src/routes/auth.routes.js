@@ -1,22 +1,15 @@
 import { Router } from 'express'
-import {
-    cadastro,
-    confirmar_codigo,
-    login_adm,
-    login_funcionario,
-    login_usuario,
-    logout,
-    pedir_reset_senha,
-    reset_senha
-} from '../controllers/auth.controller.js'
-
-import {
-    verificarToken,
-    verificarTokenReset
-} from '../middlewares/logger.middleware.js'
+import { cadastro, confirmar_codigo, login_adm, login_funcionario, login_usuario, logout, pedir_reset_senha, reset_senha} from '../controllers/auth.controller.js'
+import { verificarToken, verificarTokenReset} from '../middlewares/logger.middleware.js'
 
 const router = Router()
 
+/**
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: Gerenciamento de autenticação e usuários
+ */
 
 /**
  * @swagger
@@ -24,7 +17,6 @@ const router = Router()
  *   post:
  *     summary: Cadastra um novo usuário
  *     tags: [Auth]
- *     
  *     requestBody:
  *       required: true
  *       content:
@@ -48,7 +40,6 @@ const router = Router()
  *                 type: string
  *               senha:
  *                 type: string
- *
  *     responses:
  *       201:
  *         description: Usuário cadastrado com sucesso
@@ -57,14 +48,12 @@ const router = Router()
  */
 router.post("/cadastro", cadastro)
 
-
 /**
  * @swagger
  * /auth/login:
  *   post:
  *     summary: Realiza login do usuário
  *     tags: [Auth]
- *
  *     requestBody:
  *       required: true
  *       content:
@@ -76,7 +65,6 @@ router.post("/cadastro", cadastro)
  *                 type: string
  *               senha:
  *                 type: string
- *
  *     responses:
  *       200:
  *         description: Login realizado com sucesso
@@ -85,15 +73,13 @@ router.post("/cadastro", cadastro)
  */
 router.post("/login", login_usuario)
 
-
 /**
  * @swagger
  * /auth/login/adm:
  *   post:
  *     summary: Realiza login do administrador
  *     tags: [Auth]
- *      
- *    requestBody:
+ *     requestBody:
  *       required: true
  *       content:
  *         application/json:
@@ -112,15 +98,13 @@ router.post("/login", login_usuario)
  */
 router.post("/login/adm", login_adm)
 
-
 /**
  * @swagger
  * /auth/login/funcionario:
  *   post:
  *     summary: Realiza login do funcionário
  *     tags: [Auth]
- * 
- *  requestBody:
+ *     requestBody:
  *       required: true
  *       content:
  *         application/json:
@@ -131,7 +115,6 @@ router.post("/login/adm", login_adm)
  *                 type: string
  *               senha:
  *                 type: string
- * 
  *     responses:
  *       200:
  *         description: Login realizado com sucesso
@@ -139,7 +122,6 @@ router.post("/login/adm", login_adm)
  *         description: Credenciais inválidas
  */
 router.post("/login/funcionario", login_funcionario)
-
 
 /**
  * @swagger
@@ -153,14 +135,13 @@ router.post("/login/funcionario", login_funcionario)
  */
 router.get("/logout", verificarToken, logout)
 
-
 /**
  * @swagger
  * /auth/login/esqueci-a-senha:
  *   post:
  *     summary: Envia código para recuperação de senha
  *     tags: [Auth]
- *  requestBody:
+ *     requestBody:
  *       required: true
  *       content:
  *         application/json:
@@ -177,15 +158,13 @@ router.get("/logout", verificarToken, logout)
  */
 router.post("/login/esqueci-a-senha", pedir_reset_senha)
 
-
 /**
  * @swagger
  * /auth/login/esqueci-a-senha-confirmar:
  *   post:
  *     summary: Confirma o código de recuperação
  *     tags: [Auth]
- * 
- *  requestBody:
+ *     requestBody:
  *       required: true
  *       content:
  *         application/json:
@@ -194,7 +173,6 @@ router.post("/login/esqueci-a-senha", pedir_reset_senha)
  *             properties:
  *               codigo:
  *                 type: string
- * 
  *     responses:
  *       200:
  *         description: Código validado com sucesso
@@ -203,15 +181,13 @@ router.post("/login/esqueci-a-senha", pedir_reset_senha)
  */
 router.post("/login/esqueci-a-senha-confirmar", confirmar_codigo)
 
-
 /**
  * @swagger
  * /auth/login/alterar-senha:
  *   put:
  *     summary: Altera a senha do usuário
  *     tags: [Auth]
- * 
- *  requestBody:
+ *     requestBody:
  *       required: true
  *       content:
  *         application/json:
@@ -222,7 +198,6 @@ router.post("/login/esqueci-a-senha-confirmar", confirmar_codigo)
  *                 type: string
  *               senha2:
  *                 type: string
- * 
  *     responses:
  *       200:
  *         description: Senha alterada com sucesso
