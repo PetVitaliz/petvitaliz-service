@@ -8,10 +8,30 @@ import { emailContatoEnviado } from '../lib/email.js'
 // Home
 
 export async function home_n_logada(req, res) {
+
+    const produto = await prisma.produtos.findMany({
+        select: {
+            nome: true,
+            descricao: true,
+            beneficios: true,
+            preco: true
+        }
+    })
+
+    if (produto.length === 0) {
+        return res.status(200).send({
+                pagina: "Home",
+                versão: "não logada", 
+                aviso: "faça login para utilizar outros recursos.",
+                produtos: "nenhum produto cadastrado no momento"
+            });
+    }
+
     return res.status(200).send({
         pagina: "Home",
         versão: "não logada", 
-        aviso: "faça login para utilizar outros recursos"
+        aviso: "faça login para utilizar outros recursos",
+        produtos: produto
     })
 }
 
@@ -98,6 +118,15 @@ export async function agendamento_n_logada(req, res) {
     })
 }
 
+// Consultas
+
+export async function consultas_n_logado(req, res) {
+    return res.status(200).send({
+        pagina: "Pagina de consultas",
+        versão: "não logada", 
+        aviso: "faça login para utilizar esse recurso"
+    })
+}
 
 
 // PARTE LOGADA
@@ -241,38 +270,62 @@ export async function editar_pet(req, res) {
     const id_pet = Number(req.params.id)
     const { nome, especie, sexo, data_nascimento } = req.body
     
-    if (!nome || typeof nome !== "string"){
-        return res.status(400).send("nome do pet é obrigatorio")
-    }
 
-    const especieFormatada = especie.toLowerCase();
-    if (!especieFormatada || typeof especieFormatada !== "string" || (especieFormatada !== "cachorro" && especieFormatada !== "gato")) {
-        return res.status(400).send("especie é obrigatorio, só atendemos 'cachorro' ou 'gato' no momento")
-    }
-
-    const sexo_lower = sexo.toLowerCase();
-    if(!sexo_lower || typeof sexo_lower !== "string" || (sexo_lower !== "m" && sexo_lower !== "f")){
-        return res.status(400).send("genero é obrigatorio e deve ser 'm' ou 'f' ")
-    }
-
-    if(!data_nascimento || typeof data_nascimento != "string"){
-        return res.status(400).send("data de nascimento é obrigatorio e precisa ser ano-mes-dia")
-    }
-
-    const novoPet = await prisma.pet.update({
-        where: { id_pet: id_pet },
-        data: {
-            nome: nome.trim(),
-            especie: especieFormatada.trim(),
-            sexo: sexo_lower.trim().toUpperCase(),
-            data_nascimento: new Date(data_nascimento.trim()),
+    try {
+        if (!id_pet) {
+            return res.status(404).send({
+                mensagem: "Id invalido"
+            })
         }
-    })
 
-    const rows = novoPet
-    return res.status(200).send({
-        pet: rows
-    })
+        const existePet = await prisma.pet.findUnique({
+            where: { id_pet: id_pet }
+        })
+
+        if (!existePet) {
+            return res.status(404).send({
+                mensagem: "Id não encontrado"
+            })
+        }
+
+        if (!nome || typeof nome !== "string"){
+            return res.status(400).send("nome do pet é obrigatorio")
+        }
+
+        const especieFormatada = especie.toLowerCase();
+        if (!especieFormatada || typeof especieFormatada !== "string" || (especieFormatada !== "cachorro" && especieFormatada !== "gato")) {
+            return res.status(400).send("especie é obrigatorio, só atendemos 'cachorro' ou 'gato' no momento")
+        }
+
+        const sexo_lower = sexo.toLowerCase();
+        if(!sexo_lower || typeof sexo_lower !== "string" || (sexo_lower !== "m" && sexo_lower !== "f")){
+            return res.status(400).send("genero é obrigatorio e deve ser 'm' ou 'f' ")
+        }
+
+        if(!data_nascimento || typeof data_nascimento != "string"){
+            return res.status(400).send("data de nascimento é obrigatorio e precisa ser ano-mes-dia")
+        }
+
+        const novoPet = await prisma.pet.update({
+            where: { id_pet: id_pet },
+            data: {
+                nome: nome.trim(),
+                especie: especieFormatada.trim(),
+                sexo: sexo_lower.trim().toUpperCase(),
+                data_nascimento: new Date(data_nascimento.trim()),
+            }
+        })
+
+        const rows = novoPet
+        return res.status(200).send({
+            pet: rows
+        })
+    } catch (error) {
+        console.log("Erro ao editar pet:", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
+    }
 }
 
 // Excluir pet (logado)
@@ -280,11 +333,50 @@ export async function editar_pet(req, res) {
 export async function excluir_pet(req, res) {
     const id_pet = Number(req.params.id)
 
-    const deletarPet = await prisma.pet.delete({
-        where: { id_pet: id_pet }
-    })
+    try {
+        if (!id_pet) {
+            return res.status(404).send({
+                mensagem: "Id invalido"
+            })
+        }
 
-    return res.status(200).send({
-        mensagem: "Pet deletado com sucesso"
-    })
+        const existePet = await prisma.pet.findUnique({
+            where: { id_pet: id_pet }
+        })
+
+        if (!existePet) {
+            return res.status(404).send({
+                mensagem: "Id não encontrado"
+            })
+        }
+
+        const deletarPet = await prisma.pet.delete({
+            where: { id_pet: id_pet }
+        })
+
+        return res.status(200).send({
+            mensagem: "Pet deletado com sucesso"
+        })
+    } catch (error) {
+        console.log("Erro ao excluir pet:", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
+    }
+}
+
+// Agendamento (logado)
+
+export async function agendamento(req, res) {
+    const {  } = req.body
+
+    return res.status(200).send("Teste")
+}
+
+// Consultas (logado)
+
+export async function consultas(req, res) {
+    const id_usuario = Number(req.params.id)
+
+    return res.status(200).send("Teste")
 }

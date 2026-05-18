@@ -108,7 +108,15 @@ export async function listar_adm(req, res) {
 
 export async function listar_adm_esp(req, res) {
     const id_adm = Number(req.params.id)
+
     try {
+
+        if (!id_adm) {
+            return res.status(404).send({
+                mensagem: "ID invalido"
+            })
+        }
+
         const adm = await prisma.administrador.findMany({
             where: { ADM_ID: id_adm },
             select: {
@@ -118,6 +126,13 @@ export async function listar_adm_esp(req, res) {
                 ADM_ATIVO: true
             }
         })
+
+        if (!adm) {
+            return res.status(404).send({
+                mensagem: "Id não encontrado"
+            })
+        }
+
         return res.status(200).send({
             ADMs: adm
         })
@@ -136,6 +151,23 @@ export async function editar_adm(req, res) {
     const { username, email, senha, ativo } = req.body
 
     try {
+
+        if (!id_adm) {
+            return res.status(404).send({
+                mensagem: "Id invalido"
+            })
+        }
+
+        const existeADM = await prisma.administrador.findUnique({
+            where: { ADM_ID: id_adm }
+        })
+
+        if (!existeADM) {
+            return res.status(404).send({
+                mensagem: "Id não encontrado"
+            })
+        }
+
         if(!username || typeof username !== "string" || username.length < 2){
             return res.status(400).send("username é obrigatorio e deve ter pelo menos 2 caracteres")
         }
@@ -157,11 +189,15 @@ export async function editar_adm(req, res) {
         }
 
         const existing = await prisma.administrador.findFirst({
-            where: { ADM_EMAIL: email.trim().toLowerCase() }
+            where: { ADM_EMAIL: email.trim().toLowerCase(),
+                NOT: { ADM_ID: id_adm }
+             }
         })
     
         const existing2 = await prisma.administrador.findFirst({
-            where: { ADM_NOME: username.trim().toLowerCase() }
+            where: { ADM_NOME: username.trim().toLowerCase(),
+                NOT: { ADM_ID: id_adm }
+             }
         })
     
         if(existing){
@@ -184,13 +220,13 @@ export async function editar_adm(req, res) {
                 ADM_ATIVO: ativo
             }
         })
-
+        
         return res.status(200).send({
             mensagem: "Administrador editado com sucesso",
             ADM: novo_ADM
         })
     } catch (error) {
-        console.error("erro ao editar adms", error);
+        console.error("erro ao editar adm", error);
         return res.status(500).send({
             mensagem: "Erro interno do servidor"
         })
@@ -206,9 +242,19 @@ export async function excluir_adm(req, res) {
    try {
 
     if (!id_adm) {
-        return res.status(404).send("Id não encontrado")
+        return res.status(404).send("Id invalido")
     }
+    
+    const existeADM = await prisma.administrador.findUnique({
+        where: { ADM_ID: id_adm }
+    })
 
+    if (!existeADM) {
+        return res.status(404).send({
+            mensagem: "Id não encontrado"
+        })
+    }
+    
     const deletarADM = await prisma.administrador.delete({
         where: { ADM_ID: id_adm }
     })
@@ -338,8 +384,15 @@ export async function listar_funcionario(req, res) {
 
 export async function listar_funcionario_esp(req, res) {
     const id_funcionario = Number(req.params.id)
+
     try {
-        const funcionario = await prisma.funcionario.findMany({
+        if (!id_funcionario) {
+            return res.status(404).send({
+                mensagem: "ID invalido"
+            })
+        }
+
+        const funcionario = await prisma.funcionario.findUnique({
             where: { id_funcionario: id_funcionario },
             select: {
                 id_funcionario: true,
@@ -347,10 +400,16 @@ export async function listar_funcionario_esp(req, res) {
                 sobrenome: true,
                 especialidade: true,
                 registro: true,
-                ativo: true,
-                senha: true
+                ativo: true
             }
         })
+
+        if (!funcionario) {
+            return res.status(404).send({
+                mensagem: "Id não encontrado"
+            })
+        }
+
         return res.status(200).send({
             funcionario: funcionario
         })
@@ -369,6 +428,23 @@ export async function editar_funcionario(req, res) {
     const { nome, sobrenome, especialidade, registro, ativo, senha } = req.body
 
     try {
+
+        if (!id_funcionario) {
+            return res.status(404).send({
+                mensagem: "ID invalido"
+            })
+        }
+
+        const existeFuncionario = await prisma.funcionario.findUnique({
+            where: { id_funcionario: id_funcionario }
+        })
+
+        if (!existeFuncionario) {
+            return res.status(404).send({
+                mensagem: "Id não encontrado"
+            })
+        }
+
         if(!nome || typeof nome !== "string" || nome.length < 2){
             return res.status(400).send("nome é obrigatorio e deve ter pelo menos 2 caracteres")
         }
@@ -403,7 +479,9 @@ export async function editar_funcionario(req, res) {
         }
     
         const existing = await prisma.funcionario.findFirst({
-            where: { registro: registro.trim() }
+            where: { registro: registro.trim(),
+                NOT: { id_funcionario: id_funcionario }
+             }
         })
     
         if(existing){
@@ -414,7 +492,7 @@ export async function editar_funcionario(req, res) {
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(senha, salt)
         
-        const novo_funcionario = await prisma.funcionario.create({
+        const novo_funcionario = await prisma.funcionario.update({
             where: { id_funcionario: id_funcionario },
             data: {
                 nome: nome.trim(),
@@ -440,7 +518,7 @@ export async function editar_funcionario(req, res) {
 }
 
 
-// Excluir ADM
+// Excluir funcionario
 
 export async function excluir_funcionario(req, res) {
     const id_funcionario = Number(req.params.id)
@@ -448,7 +526,17 @@ export async function excluir_funcionario(req, res) {
    try {
 
     if (!id_funcionario) {
-        return res.status(404).send("Id não encontrado")
+        return res.status(404).send("Id invalido")
+    }
+
+    const existeFuncionario = await prisma.funcionario.findUnique({
+        where: { id_funcionario: id_funcionario }
+    })
+
+    if (!existeFuncionario) {
+        return res.status(404).send({
+            mensagem: "Id não encontrado"
+        })
     }
 
     const deletarFuncionario = await prisma.funcionario.delete({
@@ -470,7 +558,7 @@ export async function excluir_funcionario(req, res) {
     })
 
     return res.status(200).send({
-        mensagem: "Administrador deletado com sucesso",
+        mensagem: "Funcionario deletado com sucesso",
         funcionarios: funcionario
     })
     
@@ -481,3 +569,17 @@ export async function excluir_funcionario(req, res) {
         })
    }
 }
+
+// Cadastrar Produto
+
+
+
+// Listar Produtos
+
+
+
+// Editar Produto
+
+
+
+// Excluir Produto
