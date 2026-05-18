@@ -1,23 +1,5 @@
 import { Router } from 'express'
-import {
-    agendamento_n_logada,
-    cadastrar_pet,
-    cadastrar_pet_n_logada,
-    contato,
-    contato_n_logada,
-    editar_pet,
-    editar_pet_n_logada,
-    excluir_pet,
-    excluir_pet_n_logada,
-    home,
-    home_n_logada,
-    listar_pet,
-    listar_pet_n_logada,
-    servicos,
-    servicos_emergencia,
-    servicos_emergencia_n_logada,
-    servicos_n_logado
-} from '../controllers/home.controller.js'
+import { agendamento, agendamento_n_logada, cadastrar_pet, cadastrar_pet_n_logada, consultas, consultas_n_logado, contato, contato_n_logada, editar_pet, editar_pet_n_logada, excluir_pet, excluir_pet_n_logada, home, home_n_logada, listar_pet, listar_pet_n_logada, servicos, servicos_emergencia, servicos_emergencia_n_logada, servicos_n_logado } from '../controllers/home.controller.js'
 
 import { verificarToken } from '../middlewares/logger.middleware.js'
 
@@ -232,5 +214,12 @@ router.delete("/user/delete/pet/:id", verificarToken, excluir_pet)
  *     tags: [Agendamento]
  */
 router.get("/agendamento", agendamento_n_logada)
+
+
+router.post("/user/agendamento", verificarToken, agendamento)
+
+router.get("/consultas", consultas_n_logado)
+
+router.get("/user/consultas", verificarToken, consultas)
 
 export default router

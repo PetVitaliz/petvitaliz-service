@@ -103,7 +103,7 @@ export async function login_usuario(req, res) {
     
         if (!igual) {
             return res.status(401).send({
-                message: "senha invalido"
+                message: "senha invalida"
             })
         }
     

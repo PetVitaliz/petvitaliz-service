@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { cadastar_funcionario, cadastro_adm, editar_funcionario, excluir_funcionario, home_adm, listar_adm, listar_adm_esp, logout_adm } from '../controllers/adm.controller.js'
+import { cadastar_funcionario, cadastro_adm, editar_adm, editar_funcionario, excluir_adm, excluir_funcionario, home_adm, listar_adm, listar_adm_esp, listar_funcionario, listar_funcionario_esp, logout_adm } from '../controllers/adm.controller.js'
 
 import { verificarTokenAdmin } from '../middlewares/logger.middleware.js'
 
@@ -84,6 +84,8 @@ router.post("/listar/adm/cadastrar/debug", cadastro_adm)
 
 router.get("/listar/adm", verificarTokenAdmin, listar_adm)
 router.get("/listar/adm/:id", verificarTokenAdmin, listar_adm_esp)
+router.put("/listar/adm/editar/:id", verificarTokenAdmin, editar_adm)
+router.delete("/listar/adm/excluir/:id", verificarTokenAdmin, excluir_adm)
 
 /**
  * @swagger
@@ -120,8 +122,8 @@ router.get("/listar/adm/:id", verificarTokenAdmin, listar_adm_esp)
  */
 
 router.post("/listar/funcionario/cadastrar", verificarTokenAdmin, cadastar_funcionario)
-router.get("/listar/funcionario", verificarTokenAdmin, listar_adm)
-router.get("/listar/funcionario/:id", verificarTokenAdmin, listar_adm_esp)
+router.get("/listar/funcionario", verificarTokenAdmin, listar_funcionario)
+router.get("/listar/funcionario/:id", verificarTokenAdmin, listar_funcionario_esp)
 router.put("/listar/funcionario/editar/:id", verificarTokenAdmin, editar_funcionario)
 router.delete("/listar/funcionario/excluir/:id", verificarTokenAdmin, excluir_funcionario)
 
