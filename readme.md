@@ -1,3 +1,4 @@
+# USER
 Home
 -”/”
 get dos planos
@@ -114,6 +115,7 @@ planos
 -”/user/planos”
 get do plano que ta aplicado ao usuario (caso ele tenha)
 -----------------------------------------------------------
+# Funcionario
 Login (funcionario)
 -”/user/login/funcionario”
 post
@@ -141,6 +143,7 @@ put marca a consulta como finalizada
 status:
 }
 --------------------------------------
+# ADM
 Login (adm)
 -”/user/login/adm”
 post
