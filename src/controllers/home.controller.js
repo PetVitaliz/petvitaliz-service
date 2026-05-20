@@ -493,3 +493,122 @@ export async function consultas(req, res) {
     }
     
 }
+
+// Pagamento
+
+export async function pagamento(req, res) {
+    const id_usuario = req.usuarioLogado.id
+    const { id_produto } = req.body
+
+    try {
+        if (!id_produto) {
+            return res.status(400).send({
+                mensagem: "Id invalido"
+            });
+        }
+
+        const planoExiste = await prisma.produtos.findUnique({
+            where: { id_produto: id_produto }
+        });
+
+        if (!planoExiste) {
+            return res.status(404).send({
+                mensagem: "Id não encontrado"
+            });
+        }
+
+        const assinaturaAtual = await prisma.assinaturas.findFirst({
+            where: { id_usuario: id_usuario }
+        })
+
+        if (assinaturaAtual) {
+            return res.status(400).send({
+                mensagem: "Você ja possui um plano, cancele o plano atual para assinar outro"
+            })
+        }
+
+        await prisma.assinaturas.create({
+            data: {
+                id_usuario: id_usuario,
+                id_produto: Number(id_produto),
+                data_assinatura: new Date()
+            }
+        })
+
+        return res.status(200).send({
+            mensagem: "Plano assinado com sucesso"
+        })
+    } catch (error) {
+        console.log("Erro ao assinar um plano:", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
+    }
+}
+
+// Plano
+
+export async function planos(req, res) {
+    const id_usuario = req.usuarioLogado.id
+
+    try {
+        const assinaturaUsuario = await prisma.assinaturas.findFirst({
+            where: { id_usuario: id_usuario },
+            include: {
+                produtos: true
+            }
+        })
+
+        if (!assinaturaUsuario) {
+            return res.status(200).send({
+                mensagem: "Você ainda não possui nenhum plano ativo"
+            })
+        }
+
+        return res.status(200).send({
+            tem_plano: true,
+            include: {
+                nome: assinaturaUsuario.produtos.nome,
+                descricao: assinaturaUsuario.produtos.descricao,
+                beneficios: assinaturaUsuario.produtos.beneficios,
+                preco: assinaturaUsuario.produtos.preco
+            }
+        })
+    } catch (error) {
+        console.log("Erro ao listar plano ativo:", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
+    }
+}
+
+// Cancelar plano
+
+export async function cancelar_plano(req, res) {
+    const id_usuario = req.usuarioLogado.id
+
+    try {
+        const assinaturaAtiva = await prisma.assinaturas.findFirst({
+            where: { id_usuario: id_usuario }
+        })
+
+        if (!assinaturaAtiva) {
+            return res.status(404).send({
+                mensagem: "Você não possui nenhum plano para ser cancelado"
+            })
+        }
+
+        await prisma.assinaturas.delete({
+            where: { id_assinatura: assinaturaAtiva.id_assinatura }
+        })
+
+        return res.status(200).send({
+            mensagem: "Plano cancelado com sucesso"
+        })
+    } catch (error) {
+        console.log("Erro ao cancelar plano:", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
+    }
+}
