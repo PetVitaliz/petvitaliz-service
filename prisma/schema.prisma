@@ -30,8 +30,8 @@ model consulta {
   id_pet         Int
   id_funcionario Int
   data_consulta  DateTime        @db.Date
-  hora_inicio    DateTime        @db.Time(0)
-  hora_fim       DateTime        @db.Time(0)
+  hora_inicio    String          @db.VarChar(10) 
+  hora_fim       String          @db.VarChar(10)
   status         consulta_status
   observacoes    String          @db.VarChar(500)
   funcionario    funcionario     @relation(fields: [id_funcionario], references: [id_funcionario], onDelete: NoAction, onUpdate: NoAction, map: "funcionario")
@@ -46,7 +46,7 @@ model funcionario {
   nome           String                    @db.VarChar(500)
   sobrenome      String                    @db.VarChar(500)
   especialidade  funcionario_especialidade
-  registro       String?                   @db.VarChar(500)
+  registro       String                   @unique@db.VarChar(500)
   ativo          Boolean                   @default(true)
   carga          Int                       @default(8)
   senha          String                    @db.VarChar(500)
@@ -124,6 +124,6 @@ enum pet_sexo {
 
 enum consulta_status {
   em_espera    @map("em espera")
-  em_endamento @map("em endamento")
-  finalizado
+  em_endamento @map("em andamento")
+  finalizado   @map("finalizado")
 }

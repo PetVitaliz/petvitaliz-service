@@ -5,6 +5,7 @@ import otpGenerator from 'otp-generator';
 import { emailReset_Enviado } from '../lib/email.js';
 
 // CADASTRO USER
+
 export async function cadastro(req, res) {
     const {email, CPF, nome, sobrenome, data_nascimento, genero, senha, telefone} = req.body
 
@@ -77,6 +78,7 @@ export async function cadastro(req, res) {
 }
 
 // LOGIN USER
+
 export async function login_usuario(req, res) {
     const {email, senha} = req.body
 
@@ -221,7 +223,7 @@ export async function login_funcionario(req, res) {
     
         if (!funcionario) {
             return res.status(401).send({
-                message: "email invalido"
+                message: "registro invalido"
             })
         }
     

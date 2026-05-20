@@ -1,6 +1,5 @@
 import { Router } from 'express'
-import { cadastar_funcionario, cadastro_adm, editar_adm, editar_funcionario, excluir_adm, excluir_funcionario, home_adm, listar_adm, listar_adm_esp, listar_funcionario, listar_funcionario_esp, logout_adm } from '../controllers/adm.controller.js'
-
+import { cadastar_funcionario, cadastro_adm, cadastro_produto, editar_adm, editar_funcionario, editar_produto, excluir_adm, excluir_funcionario, excluir_produto, home_adm, listar_adm, listar_adm_esp, listar_funcionario, listar_funcionario_esp, listar_produto_especifico, listar_produtos, logout_adm } from '../controllers/adm.controller.js'
 import { verificarTokenAdmin } from '../middlewares/logger.middleware.js'
 
 const router = Router()
@@ -18,7 +17,7 @@ const router = Router()
  *       401:
  *         description: Token inválido ou acesso negado
  */
-router.get("/", verificarTokenAdmin, home_adm)
+router.get("", verificarTokenAdmin, home_adm)
 
 
 /**
@@ -126,5 +125,12 @@ router.get("/listar/funcionario", verificarTokenAdmin, listar_funcionario)
 router.get("/listar/funcionario/:id", verificarTokenAdmin, listar_funcionario_esp)
 router.put("/listar/funcionario/editar/:id", verificarTokenAdmin, editar_funcionario)
 router.delete("/listar/funcionario/excluir/:id", verificarTokenAdmin, excluir_funcionario)
+
+
+router.post("/listar/produtos/cadastrar", verificarTokenAdmin, cadastro_produto)
+router.get("/listar/produtos", verificarTokenAdmin, listar_produtos)
+router.get("/listar/produtos/:id", verificarTokenAdmin, listar_produto_especifico)
+router.put("/listar/produtos/editar/:id", verificarTokenAdmin, editar_produto)
+router.delete("/listar/produtos/excluir/:id", verificarTokenAdmin, excluir_produto)
 
 export default router

@@ -368,15 +368,128 @@ export async function excluir_pet(req, res) {
 // Agendamento (logado)
 
 export async function agendamento(req, res) {
-    const {  } = req.body
+    const { servico, id_pet, data_consulta, hora_inicio, observacoes } = req.body
+    const id_usuario = req.usuarioLogado.id
 
-    return res.status(200).send("Teste")
+    try {
+        if (!servico || !id_pet || !data_consulta || !hora_inicio) {
+            return res.status(400).send({
+                mensagem: "Todos os campos são obrigatorios"
+            })
+        }
+
+        const servico_lower = servico
+        if (servico_lower != 'tosador' && servico_lower != 'veterinario') {
+            return res.status(400).send({
+                mensagem: "no momento so temos 'tosador' e 'veterinario' "
+            })
+        }
+
+        const funcionarioDisponivel = await prisma.funcionario.findMany({
+            where: {
+                especialidade: servico_lower.trim(),
+                ativo: true,
+                carga: { gt: 0 }
+            }
+        })
+
+        if (funcionarioDisponivel.length === 0) {
+            return res.status(404).send({
+                mensagem: "Nenhum profissional disponivel no momento, desculpe a inconveniencia"
+            })
+        }
+
+        const funcionarioSorteado = funcionarioDisponivel[Math.floor(Math.random () * funcionarioDisponivel.length)]
+        const id_funcionario = funcionarioSorteado.id_funcionario
+
+        const [horas, minutos] = hora_inicio.split(":").map(Number)
+        const hora_fim = `${String((horas + 1) % 24).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`
+
+        const conflitoHorario = await prisma.consulta.findFirst({
+            where: {
+                id_funcionario: id_funcionario,
+                data_consulta: new Date(data_consulta),
+                hora_inicio: hora_inicio
+            }
+        })
+
+        if (conflitoHorario) {
+            return res.status(409).send({
+                mensagem: "Este horrario ja possui uma consulta ativa"
+            })
+        }
+
+        await prisma.$transaction([
+            prisma.consulta.create({
+                data: {
+                    id_funcionario: id_funcionario,
+                    id_pet: Number(id_pet),
+                    data_consulta: new Date(data_consulta),
+                    hora_inicio: hora_inicio,
+                    hora_fim: hora_fim,
+                    observacoes: observacoes || "",
+                    status: "em_espera"
+                }
+            }),
+            prisma.funcionario.update({
+                where: { id_funcionario: id_funcionario },
+                data: {
+                    carga: { decrement: 1 }
+                }
+            })
+        ])
+
+        return res.status(201).send({
+            mensagem: "Consulta agendada com sucesso"
+        })
+    } catch (error) {
+        console.log("Erro ao agendar consulta:", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
+    }
 }
 
 // Consultas (logado)
 
 export async function consultas(req, res) {
-    const id_usuario = Number(req.params.id)
+    const id_usuario = req.usuarioLogado.id
 
-    return res.status(200).send("Teste")
+    try {
+        const listaConsulta = await prisma.consulta.findMany({
+            where: {
+                pet: {
+                    id_usuario: id_usuario
+                }
+            }, 
+            include: {
+                pet: {
+                    select: { nome: true }
+                },
+                funcionario: {
+                    select: { nome: true, especialidade: true }
+                }
+            },
+            orderBy: [
+                { data_consulta: 'desc' },
+                { hora_inicio: 'asc' }
+            ]
+        })
+
+        if (listaConsulta.length === 0) {
+            return res.status(404).send({
+                mensagem: "Você não possui nenhuma consulta"
+            })
+        }
+
+        return res.status(200).send({
+            consultas: listaConsulta
+        })
+    } catch (error) {
+        console.log("Erro ao listar consultas:", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
+    }
+    
 }
