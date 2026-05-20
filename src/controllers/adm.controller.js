@@ -74,7 +74,7 @@ export async function cadastro_adm(req, res) {
     
         return res.status(201).send("Administrador cadastrado com sucesso")
     } catch (error) {
-        console.error("erro ao atualizar a senha", error);
+        console.error("erro ao cadastrar adm", error);
         return res.status(500).send({
             mensagem: "Erro interno do servidor"
         })
@@ -112,8 +112,16 @@ export async function listar_adm_esp(req, res) {
     try {
 
         if (!id_adm) {
+        return res.status(404).send("Id invalido")
+        }
+        
+        const existeADM = await prisma.administrador.findUnique({
+            where: { ADM_ID: id_adm }
+        })
+
+        if (!existeADM) {
             return res.status(404).send({
-                mensagem: "ID invalido"
+                mensagem: "Id não encontrado"
             })
         }
 
@@ -127,17 +135,11 @@ export async function listar_adm_esp(req, res) {
             }
         })
 
-        if (!adm) {
-            return res.status(404).send({
-                mensagem: "Id não encontrado"
-            })
-        }
-
         return res.status(200).send({
             ADMs: adm
         })
     } catch (error) {
-        console.error("erro ao listar adms", error);
+        console.error("erro ao listar adm especifico", error);
         return res.status(500).send({
             mensagem: "Erro interno do servidor"
         })
@@ -274,7 +276,7 @@ export async function excluir_adm(req, res) {
     })
     
    } catch (error) {
-        console.error("erro ao excluir adms", error);
+        console.error("erro ao excluir adm", error);
         return res.status(500).send({
             mensagem: "Erro interno do servidor"
         })
@@ -387,8 +389,16 @@ export async function listar_funcionario_esp(req, res) {
 
     try {
         if (!id_funcionario) {
+            return res.status(404).send("Id invalido")
+        }
+
+        const existeFuncionario = await prisma.funcionario.findUnique({
+            where: { id_funcionario: id_funcionario }
+        })
+
+        if (!existeFuncionario) {
             return res.status(404).send({
-                mensagem: "ID invalido"
+                mensagem: "Id não encontrado"
             })
         }
 
@@ -403,12 +413,6 @@ export async function listar_funcionario_esp(req, res) {
                 ativo: true
             }
         })
-
-        if (!funcionario) {
-            return res.status(404).send({
-                mensagem: "Id não encontrado"
-            })
-        }
 
         return res.status(200).send({
             funcionario: funcionario
@@ -572,14 +576,229 @@ export async function excluir_funcionario(req, res) {
 
 // Cadastrar Produto
 
+export async function cadastro_produto(req, res) {
+    const {nome, descricao, beneficios, preco} = req.body
 
+    try {
+        if(!nome || typeof nome !== "string" || nome.length < 5){
+            return res.status(400).send("nome é obrigatorio e deve ter pelo menos 5 caracteres")
+        }
+    
+        if (!descricao || typeof descricao !== "string"){
+            return res.status(400).send("descricao é obrigatorio")
+        }
+    
+        if(!beneficios || typeof beneficios !== "string" || beneficios.length < 6){
+            return res.status(400).send("beneficios é obrigatorio e deve ter pelo menos 6 caracteres")
+        }
+        
+        if (preco === undefined) {
+            return res.status(400).send("preco é obrigatorio ")
+        }
 
-// Listar Produtos
+        if(typeof preco !== 'number'){
+            return res.status(400).send("preco deve ser um numero")
+        }
+        
+        const produto = await prisma.produtos.create({
+            data: {
+                nome: nome.trim(),
+                descricao: descricao.trim(),
+                beneficios: beneficios,
+                preco: preco
+            }
+        })
+    
+        return res.status(201).send("Produto cadastrado com sucesso")
+    } catch (error) {
+        console.error("erro ao cadastrar produto", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
+    }
+}
+
+// Listar Produto
+
+export async function listar_produtos(req, res) {
+    try {
+        const produtos = await prisma.produtos.findMany({
+            select: {
+                id_produto: true,
+                nome: true,
+                descricao: true,
+                beneficios: true,
+                preco: true
+            }
+        })
+        return res.status(200).send({
+            produtos: produtos
+        })
+    } catch (error) {
+        console.error("erro ao listar produtos", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
+    }
+}
+
+// Listar produto especifico
+
+export async function listar_produto_especifico(req, res) {
+    const id_produto = Number(req.params.id)
+
+    try {
+        if (!id_produto) {
+            return res.status(404).send({
+                mensagem: "ID invalido"
+            })
+        }
+
+        const existeProduto = await prisma.produtos.findUnique({
+            where: { id_produto: id_produto }
+        })
+
+        if (!existeProduto) {
+            return res.status(404).send({
+                mensagem: "Id não encontrado"
+            })
+        }
+        const produto = await prisma.produtos.findUnique({
+            where: { id_produto: id_produto },
+            select: {
+                id_produto: true,
+                nome: true,
+                descricao: true,
+                beneficios: true,
+                preco: true
+            }
+        })
+
+        return res.status(200).send({
+            produto: produto
+        })
+    } catch (error) {
+        console.error("erro ao listar produto especifico", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
+    }
+}
 
 
 
 // Editar Produto
 
+export async function editar_produto(req, res) {
+    const id_produto = Number(req.params.id)
+    const {nome, descricao, beneficios, preco} = req.body
 
+    try {
+
+        if (!id_produto) {
+            return res.status(404).send({
+                mensagem: "ID invalido"
+            })
+        }
+
+        const existeProduto = await prisma.produtos.findUnique({
+            where: { id_produto: id_produto }
+        })
+
+        if (!existeProduto) {
+            return res.status(404).send({
+                mensagem: "Id não encontrado"
+            })
+        }
+
+        if(!nome || typeof nome !== "string" || nome.length < 5){
+            return res.status(400).send("nome é obrigatorio e deve ter pelo menos 5 caracteres")
+        }
+    
+        if (!descricao || typeof descricao !== "string"){
+            return res.status(400).send("descricao é obrigatorio")
+        }
+    
+        if(!beneficios || typeof beneficios !== "string" || beneficios.length < 6){
+            return res.status(400).send("beneficios é obrigatorio e deve ter pelo menos 6 caracteres")
+        }
+        
+        if (preco === undefined) {
+            return res.status(400).send("preco é obrigatorio")
+        }
+
+        if(typeof preco !== 'number'){
+            return res.status(400).send("preco deve ser um numero")
+        }
+        
+        const novo_Produto = await prisma.produtos.update({
+            where: { id_produto: id_produto },
+            data: {
+                nome: nome.trim(),
+                descricao: descricao.trim(),
+                beneficios: beneficios,
+                preco: preco
+            }
+        })
+    
+        return res.status(201).send({
+            mensagem: "Produto atualizado com sucesso",
+            novo_Produto: novo_Produto
+        })
+    } catch (error) {
+        console.error("erro ao editar produto", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
+    }   
+}
 
 // Excluir Produto
+
+export async function excluir_produto(req, res) {
+    const id_produto = Number(req.params.id)
+
+   try {
+
+    if (!id_produto) {
+        return res.status(404).send("Id invalido")
+    }
+
+    const existeProduto = await prisma.produtos.findUnique({
+        where: { id_produto: id_produto }
+    })
+
+    if (!existeProduto) {
+        return res.status(404).send({
+            mensagem: "Id não encontrado"
+        })
+    }
+
+    const deletarProduto = await prisma.produtos.delete({
+        where: { id_produto: id_produto }
+    })
+
+    const produtos = await prisma.produtos.findMany({
+        select: {
+            id_produto: true,
+            nome: true,
+            descricao: true,
+            beneficios: true,
+            preco: true
+        }, orderBy: {
+            id_produto: 'desc',
+          } 
+    })
+
+    return res.status(200).send({
+        mensagem: "Produto deletado com sucesso",
+        Produtos: produtos
+    })
+    
+   } catch (error) {
+        console.error("erro ao excluir produto", error);
+        return res.status(500).send({
+            mensagem: "Erro interno do servidor"
+        })
+   }
+}

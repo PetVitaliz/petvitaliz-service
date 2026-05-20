@@ -12,7 +12,7 @@ const router = Router()
  *     summary: Acessa a página inicial pública
  *     tags: [Home]
  */
-router.get("/", home_n_logada)
+router.get("", home_n_logada)
 
 
 /**
