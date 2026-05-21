@@ -1,3 +1,5 @@
 /node_modules
 .env
 prisma/migrations
+drakengard.jpg
+teste-upload.js
