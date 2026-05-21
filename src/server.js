@@ -10,6 +10,7 @@ import admRoutes from './routes/adm.routes.js'
 import funcionarioRoutes from './routes/funcionario.routes.js'
 import swaggerUi from 'swagger-ui-express'
 import swaggerSpec from './docs/swagger.js'
+import cloudinary from './lib/cloudnary.js'
 
 const app = express()
 const Port = process.env.PORT
