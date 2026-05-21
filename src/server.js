@@ -10,12 +10,36 @@ import admRoutes from './routes/adm.routes.js'
 import funcionarioRoutes from './routes/funcionario.routes.js'
 import swaggerUi from 'swagger-ui-express'
 import swaggerSpec from './docs/swagger.js'
-import cloudinary from './lib/cloudnary.js'
 
 const app = express()
 const Port = process.env.PORT
+const origensPermitidas = [
+    'http://localhost:4200', // porta padrão do angular
+    'http://localhost:3000'  // coisas locais
+];
 
-app.use(cors())
+if (process.env.FRONTEND_URL) {
+    origensPermitidas.push(process.env.FRONTEND_URL)
+}
+
+
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin) {
+            return callback(null, true)
+        }
+        
+        if (origensPermitidas.indexOf(origin) !== -1) {
+            callback(null, true)
+        } else {
+            callback(new Error('Origem não permitida'))
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}))
+
 app.use(express.json())
 app.use(logger)
 app.use(cookieParser())
