@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { prisma } from '../lib/prisma.js'
+import cloudnary from '../lib/cloudnary.js'
 
 // Home
 
@@ -801,4 +802,35 @@ export async function excluir_produto(req, res) {
             mensagem: "Erro interno do servidor"
         })
    }
+}
+
+// Upload de imagem
+
+export async function uploadImagem(req, res) {
+    try {
+        if (!req.file) {
+            return res.status(400).send({
+                mensagem: "Nenhum arquivo enviado"
+            })
+        }
+
+        const fName = req.file.originalname.split('.')[0]
+        const fileBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
+        
+        const resultadoCloudnary = await cloudnary.uploader.upload(fileBase64, {
+            folder: 'petvitaliz',
+            public_id: `${Date.now()}-${fName}`,
+            resource_type: 'image'
+        })
+
+        return res.status(200).send({
+            mensagem: "Upload realizado com sucesso",
+            url: resultadoCloudnary.secure_url
+        })
+    } catch (error) {
+        console.log("Erro no upload para o Cloudinary:", error)
+        return res.status(500).json({
+            mensagem: "Erro interno do servidor" 
+        })
+    }
 }
