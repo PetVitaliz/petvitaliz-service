@@ -25,7 +25,7 @@ export async function cadastro(req, res) {
         return res.status(400).send("senha é obrigatoria e deve ter pelo menos 6 caracteres")
     }
 
-    if(!CPF || typeof CPF !== "string" || CPF.length < 11){
+    if(!CPF || typeof CPF !== "string" || CPF.length < 11 || CPF.length > 11){
         return res.status(400).send("CPF é obrigatorio e deve ter 11 digitos")
     }
 
@@ -50,12 +50,20 @@ export async function cadastro(req, res) {
         where: { CPF: CPF.trim().toLowerCase() }
     })
 
+    const existing3 = await prisma.usuario.findUnique({
+        where: { telefone: telefone.trim() }
+    })
+
     if(existing){
         return res.status(400).send("Email ja cadastrado")
     }
 
     if(existing2){
         return res.status(400).send("CPF ja cadastrado")
+    }
+
+    if(existing3){
+        return res.status(400).send("Numero de telefone ja cadastrado")
     }
 
     const salt = await bcrypt.genSalt(10)
@@ -66,7 +74,7 @@ export async function cadastro(req, res) {
             nome: nome.trim(),
             sobrenome: sobrenome.trim(),
             CPF: CPF.trim(),
-            data_nascimento: new Date(data_nascimento.trim()),
+            data_nascimento: new Date(data_nascimento),
             genero: genero_lower.trim().toUpperCase(),
             telefone: telefone.trim(),
             email: email.trim().toLowerCase(),
@@ -74,7 +82,7 @@ export async function cadastro(req, res) {
         }
     })
 
-    return res.status(201).send("Usuario cadastrado com sucesso")
+    return res.status(201).json("Usuario cadastrado com sucesso")
 }
 
 // LOGIN USER
@@ -87,8 +95,8 @@ export async function login_usuario(req, res) {
             return res.status(400).send("email é obrigatorio")
         }
     
-        if(!senha || typeof senha !== "string" || senha.length < 6){
-            return res.status(400).send("senha é obrigatorio e deve ter pelo menos 6 caracteres")
+        if(!senha || typeof senha !== "string"){
+            return res.status(400).send("campo senha é obrigatorio")
         }
     
         const usuario = await prisma.usuario.findUnique({
@@ -116,20 +124,25 @@ export async function login_usuario(req, res) {
              sobrenome: usuario.sobrenome,
              role: "USUARIO" },
             process.env.JWT_SECRET,
-            { expiresIn: '1h' }
+            { expiresIn: '3d' }
         )
     
         return res.status(200).cookie('token', token_user, {
             httpOnly: true,
-            secure: false,
-            maxAge: 60 * 60 * 1000
+            secure: true,
+            maxAge: 3 * 24 * 60 * 60 * 1000
          }).json({
-            message: "Login realizado com sucesso"
+            mensagem: "Login realizado com sucesso",
+            usuario: {
+                nome: `${usuario.nome} ${usuario.sobrenome}`,
+                email: usuario.email,
+                tipo: 'usuario'
+            }
         })
     } catch (error) {
         console.error("erro ao logar como usuario", error);
         return res.status(500).send({
-            mensagem: "Erro interno do servidor"
+            mensagem: "Erro interno do servidor",
         })
     }
 }
