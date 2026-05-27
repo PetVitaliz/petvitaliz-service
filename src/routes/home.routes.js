@@ -128,7 +128,7 @@ router.get("/cadastar/pet", cadastrar_pet_n_logada)
  *               data_nascimento:
  *                 type: string
  */
-router.post("/user/cadastar/pet", verificarToken, cadastrar_pet)
+router.post("/user/listar/pet/cadastar", verificarToken, cadastrar_pet)
 
 
 /**
@@ -183,7 +183,7 @@ router.get("/editar/pet/:id", editar_pet_n_logada)
  *               data_nascimento:
  *                 type: string
  */
-router.put("/user/editar/pet/:id", verificarToken, editar_pet)
+router.put("/user/listar/pet/editar/:id", verificarToken, editar_pet)
 
 
 /**
@@ -203,7 +203,7 @@ router.get("/delete/pet/:id", excluir_pet_n_logada)
  *     summary: Remove um pet cadastrado
  *     tags: [Pets]
  */
-router.delete("/user/delete/pet/:id", verificarToken, excluir_pet)
+router.delete("/user/listar/pet/delete/:id", verificarToken, excluir_pet)
 
 
 /**

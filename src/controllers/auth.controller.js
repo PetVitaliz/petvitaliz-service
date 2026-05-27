@@ -10,36 +10,36 @@ export async function cadastro(req, res) {
     const {email, CPF, nome, sobrenome, data_nascimento, genero, senha, telefone} = req.body
 
     if(!nome || typeof nome !== "string" || nome.length < 2){
-        return res.status(400).send("nome é obrigatorio e deve ter pelo menos 2 caracteres")
+        return res.status(400).json("Nome é obrigatorio e deve ter pelo menos 2 caracteres")
     }
 
-    if(!sobrenome || typeof sobrenome !== "string" || sobrenome.length < 5){
-        return res.status(400).send("sobrenome é obrigatorio e deve ter pelo menos 3 caracteres")
+    if(!sobrenome || typeof sobrenome !== "string" || sobrenome.length < 3){
+        return res.status(400).json("Sobrenome é obrigatorio e deve ter pelo menos 3 caracteres")
     }
 
     if (!email || typeof email !== "string"){
-        return res.status(400).send("email é obrigatorio")
+        return res.status(400).json("Email é obrigatorio")
     }
 
     if(!senha || typeof senha !== "string" || senha.length < 6){
-        return res.status(400).send("senha é obrigatoria e deve ter pelo menos 6 caracteres")
+        return res.status(400).json("Senha é obrigatoria e deve ter pelo menos 6 caracteres")
     }
 
     if(!CPF || typeof CPF !== "string" || CPF.length < 11 || CPF.length > 11){
-        return res.status(400).send("CPF é obrigatorio e deve ter 11 digitos")
+        return res.status(400).json("CPF é obrigatorio e deve ter 11 digitos")
     }
 
-    if(!telefone || typeof telefone !== "string" || telefone.length < 11){
-        return res.status(400).send("telefone é obrigatorio e deve ter 11 digitos")
+    if(!telefone || typeof telefone !== "string" || telefone.length < 11 || telefone.length > 11){
+        return res.status(400).json("Telefone é obrigatorio e deve ter 11 digitos")
     }
 
     const genero_lower = genero.toLowerCase()
     if(!genero_lower || typeof genero_lower !== "string" || (genero_lower !== "m" && genero_lower !== "f" && genero_lower !== "o")){
-        return res.status(400).send("genero é obrigatorio e deve ser 'f', 'm' ou 'o' ")
+        return res.status(400).json("Genero é obrigatorio e deve ser 'f', 'm' ou 'o' ")
     }
 
     if(!data_nascimento || typeof data_nascimento != "string"){
-        return res.status(400).send("data de nascimento é obrigatorio e precisa ser ano-mes-dia")
+        return res.status(400).json("Data de nascimento é obrigatorio")
     }    
 
     const existing = await prisma.usuario.findUnique({
@@ -55,15 +55,15 @@ export async function cadastro(req, res) {
     })
 
     if(existing){
-        return res.status(400).send("Email ja cadastrado")
+        return res.status(400).json("Email ja cadastrado")
     }
 
     if(existing2){
-        return res.status(400).send("CPF ja cadastrado")
+        return res.status(400).json("CPF ja cadastrado")
     }
 
     if(existing3){
-        return res.status(400).send("Numero de telefone ja cadastrado")
+        return res.status(400).json("Numero de telefone ja cadastrado")
     }
 
     const salt = await bcrypt.genSalt(10)
