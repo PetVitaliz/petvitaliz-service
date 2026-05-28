@@ -15,7 +15,8 @@ const app = express()
 const Port = process.env.PORT
 const origensPermitidas = [
     'http://localhost:4200', // porta padrão do angular
-    'http://localhost:3000'  // coisas locais
+    'http://localhost:3000',  // coisas locais
+    'https://petvitaliz.vercel.app' // versel
 ];
 
 if (process.env.FRONTEND_URL) {
@@ -44,8 +45,8 @@ app.use(express.json())
 app.use(logger)
 app.use(cookieParser())
 
-app.use("/user", authRoutes)
 app.use("/", homeRoutes)
+app.use("/user", authRoutes)
 app.use("/adm", admRoutes)
 app.use("/funcionario", funcionarioRoutes)
 

@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { agendamento, agendamento_n_logada, cadastrar_pet, cadastrar_pet_n_logada, cancelar_plano, consultas, consultas_n_logado, contato, contato_n_logada, editar_pet, editar_pet_n_logada, excluir_pet, excluir_pet_n_logada, home, home_n_logada, listar_pet, listar_pet_n_logada, pagamento, planos, servicos, servicos_emergencia, servicos_emergencia_n_logada, servicos_n_logado } from '../controllers/home.controller.js'
-
 import { verificarToken } from '../middlewares/logger.middleware.js'
+import { uploadConfig } from '../middlewares/upload.middleware.js'
 
 const router = Router()
 
@@ -128,7 +128,7 @@ router.get("/cadastar/pet", cadastrar_pet_n_logada)
  *               data_nascimento:
  *                 type: string
  */
-router.post("/user/listar/pet/cadastar", verificarToken, cadastrar_pet)
+router.post("/user/listar/pet/cadastar", verificarToken, uploadConfig.single('image'), cadastrar_pet)
 
 
 /**
