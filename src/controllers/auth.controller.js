@@ -92,11 +92,11 @@ export async function login_usuario(req, res) {
 
     try {
         if (!email || typeof email !== "string"){
-            return res.status(400).send("email é obrigatorio")
+            return res.status(400).send("Campo email é obrigatorio")
         }
     
         if(!senha || typeof senha !== "string"){
-            return res.status(400).send("campo senha é obrigatorio")
+            return res.status(400).send("Campo senha é obrigatorio")
         }
     
         const usuario = await prisma.usuario.findUnique({
@@ -105,7 +105,7 @@ export async function login_usuario(req, res) {
     
         if (!usuario) {
             return res.status(401).send({
-                message: "email invalido"
+                message: "Email invalido"
             })
         }
     
@@ -113,7 +113,7 @@ export async function login_usuario(req, res) {
     
         if (!igual) {
             return res.status(401).send({
-                message: "senha invalida"
+                message: "Senha invalida"
             })
         }
     

@@ -58,8 +58,13 @@ model pet {
   id_usuario      Int
   nome            String      @db.VarChar(500)
   especie         pet_especie
+  outra_especie   String?     @db.VarChar(100)
   sexo            pet_sexo
   data_nascimento DateTime    @db.Date
+  foto_url        String?     @db.VarChar(1000)
+  idade           Int
+  peso            Float?
+  observacoes     String?     @db.VarChar(1000)
   consulta        consulta[]
   usuario         usuario     @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "dono")
 
@@ -104,6 +109,9 @@ model usuario {
 enum pet_especie {
   cachorro
   gato
+  ave
+  coelho
+  outro
 }
 
 enum funcionario_especialidade {

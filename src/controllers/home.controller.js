@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { prisma } from '../lib/prisma.js'
 import { emailContatoEnviado } from '../lib/email.js'
+import cloudnary from '../lib/cloudnary.js'
 
 // PARTE NAO LOGADA
 
@@ -206,75 +207,118 @@ export async function listar_pet(req, res) {
     const id_usuario = Number(req.usuarioLogado.id)
     
 
-    const pets = await prisma.pet.findMany({
-        where: { id_usuario: id_usuario },
-        select: {
-            nome: true,
-            especie: true,
-            sexo: true,
-            data_nascimento: true
-        }
-    })
+    try {
+        const pets = await prisma.pet.findMany({
+            where: { id_usuario: id_usuario }
+        })
+        
+        console.log(`Pets encontrados para o usuário ${id_usuario}:`, pets)
 
-    return res.status(200).send({
-        mensagem: "Pagina de listar pet",
-        usuario: `${nome} ${sobrenome}`,
-        Pets: pets
-    })
+        return res.status(200).send({
+            mensagem: "Pagina de listar pet",
+            usuario: `${nome} ${sobrenome}`,
+            Pets: pets
+        })
+    } catch (error) {
+        console.error("Erro ao listar pets no banco:", error)
+        return res.status(500).json({
+            mensagem: "Erro interno do servidor ao buscar pets"
+        })
+    }
 }
 
 // Cadastrar pet (logado)
 
 export async function cadastrar_pet(req, res) {
-    const { nome, especie, sexo, data_nascimento } = req.body
+    const { nome, especie, sexo, data_nascimento, idade, outra_especie, peso } = req.body
     const id_usuario = req.usuarioLogado.id
     
 
     if (!nome || typeof nome !== "string"){
-        return res.status(400).send("nome do pet é obrigatorio")
+        return res.status(400).json("Nome do pet é obrigatorio")
     }
 
-    if (!especie || typeof especie !== "string" || (especie !== "cachorro" && especie !== "gato" && especie !== "CACHORRO" && especie !== "GATO")) {
-        return res.status(400).send("especie é obrigatorio, só atendemos 'cachorro' ou 'gato' no momento")
+    if(peso === undefined ||  peso === null || isNaN(Number(idade))){
+        return res.status(400).json("Peso é obrigatorio e deve ser um numero")
     }
 
-    const sexo_lower = sexo.toLowerCase()
+    const especie_lower = especie.trim().toLowerCase()
+    if (especie_lower !== "cachorro" && especie_lower !== "gato" && especie_lower !== "ave" && especie_lower !== "coelho" && especie_lower !== "outro") {
+        return res.status(400).json("Espécie inválida")
+    }
+
+    const sexo_lower = sexo ? sexo.toLowerCase().trim() : ''
     if(!sexo_lower || typeof sexo_lower !== "string" || (sexo_lower !== "m" && sexo_lower !== "f")){
-        return res.status(400).send("genero é obrigatorio e deve ser 'm' ou 'f' ")
+        return res.status(400).json("Gênero é obrigatorio e deve ser 'm' ou 'f' ")
     }
+    const sexoFinal = (sexo_lower === "masculino" || sexo_lower === "m") ? "M" : "F"
 
     if(!data_nascimento || typeof data_nascimento != "string"){
-        return res.status(400).send("data de nascimento é obrigatorio e precisa ser ano-mes-dia")
+        return res.status(400).json("Data de nascimento é obrigatorio e precisa ser ano-mes-dia")
     }
+
+    if(idade === undefined ||  idade === null || isNaN(Number(idade))){
+        return res.status(400).json("Idade é obrigatoria e deve ser um numero")
+    }
+
+    if (especie_lower == "outro") {
+        if (!outra_especie) {
+            return res.status(400).json("Outra especie é obrigatorio quando selecionado outro")
+        }
+    }
+
+    try {
+        let urlFotoCloudnary = null
+
+        if (req.file) {
+            const fName = req.file.originalname.split('.')[0]
+            const fileBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
+
+            const resultadoCloudnary = await cloudnary.uploader.upload(fileBase64, {
+                folder: 'petvitaliz',
+                public_id: `${Date.now()}-${fName}`,
+                resource_type: 'image'
+            })
+
+            urlFotoCloudnary = resultadoCloudnary.secure_url
+        }
 
     const pet = await prisma.pet.create({
         data: {
             nome: nome.trim(),
-            especie: especie.trim().toLowerCase(),
-            sexo: sexo_lower.trim().toUpperCase(),
+            especie: especie_lower,
+            outra_especie: especie_lower === "outro" ? outra_especie.trim() : null,
+            sexo: sexoFinal,
             data_nascimento: new Date(data_nascimento.trim()),
+            idade: Number(idade) || 0,
+            peso: peso ? Number(peso) : null,
+            foto_url: urlFotoCloudnary,
             usuario: {
                 connect: {id_usuario: Number(id_usuario)}
             }
         }
     })
 
-    return res.status(201).send({
-        mensagem: "Pet cadastrado com sucesso"
-    })
+    return res.status(201).json("Pet cadastrado com sucesso")
+   } catch (error) {
+        console.error("Erro ao cadastrar pet:", error)
+        return res.status(500).json({
+            mensagem: "Erro interno do servidor"
+        })
+    }
 }
 
 // Editar pet (logado)
 
+// Editar pet
 export async function editar_pet(req, res) {
     const id_pet = Number(req.params.id)
-    const { nome, especie, sexo, data_nascimento } = req.body
+    const { nome, especie, sexo, data_nascimento, idade, peso, outra_especie, observacoes } = req.body
     
-
     try {
         if (!id_pet) {
-            return res.status(404).send({
-                mensagem: "Id invalido"
+            return res.status(400).send({
+                mensagem: "Id inválido"
             })
         }
 
@@ -284,41 +328,53 @@ export async function editar_pet(req, res) {
 
         if (!existePet) {
             return res.status(404).send({
-                mensagem: "Id não encontrado"
+                mensagem: "Pet não encontrado"
             })
         }
 
         if (!nome || typeof nome !== "string"){
-            return res.status(400).send("nome do pet é obrigatorio")
+            return res.status(400).send("Nome do pet é obrigatório")
         }
 
-        const especieFormatada = especie.toLowerCase();
-        if (!especieFormatada || typeof especieFormatada !== "string" || (especieFormatada !== "cachorro" && especieFormatada !== "gato")) {
-            return res.status(400).send("especie é obrigatorio, só atendemos 'cachorro' ou 'gato' no momento")
+        const especie_lower = especie ? especie.trim().toLowerCase() : ''
+        if (especie_lower !== "cachorro" && especie_lower !== "gato" && especie_lower !== "ave" && especie_lower !== "coelho" && especie_lower !== "outro") {
+            return res.status(400).send("Espécie inválida")
         }
 
-        const sexo_lower = sexo.toLowerCase();
-        if(!sexo_lower || typeof sexo_lower !== "string" || (sexo_lower !== "m" && sexo_lower !== "f")){
-            return res.status(400).send("genero é obrigatorio e deve ser 'm' ou 'f' ")
+        if (especie_lower === "outro" && !outra_especie) {
+            return res.status(400).send("Especificar a outra espécie é obrigatório")
         }
 
-        if(!data_nascimento || typeof data_nascimento != "string"){
-            return res.status(400).send("data de nascimento é obrigatorio e precisa ser ano-mes-dia")
+        const sexo_lower = sexo ? sexo.toLowerCase().trim() : ''
+        if(!sexo_lower || (sexo_lower !== "m" && sexo_lower !== "f")){
+            return res.status(400).send("Gênero é obrigatório e deve ser 'm' ou 'f' ")
+        }
+        const sexoFinal = sexo_lower.toUpperCase()
+
+        if(!data_nascimento || typeof data_nascimento !== "string"){
+            return res.status(400).send("Data de nascimento é obrigatória (ano-mes-dia)")
+        }
+
+        if(idade === undefined || idade === null || isNaN(Number(idade))){
+            return res.status(400).send("Idade é obrigatória e deve ser um número")
         }
 
         const novoPet = await prisma.pet.update({
             where: { id_pet: id_pet },
             data: {
                 nome: nome.trim(),
-                especie: especieFormatada.trim(),
-                sexo: sexo_lower.trim().toUpperCase(),
+                especie: especie_lower,
+                outra_especie: especie_lower === "outro" ? outra_especie.trim() : null,
+                sexo: sexoFinal,
                 data_nascimento: new Date(data_nascimento.trim()),
+                idade: Number(idade),
+                peso: peso ? Number(peso) : null,
+                observacoes: observacoes
             }
         })
 
-        const rows = novoPet
         return res.status(200).send({
-            pet: rows
+            pet: novoPet
         })
     } catch (error) {
         console.log("Erro ao editar pet:", error);
