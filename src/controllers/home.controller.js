@@ -238,8 +238,8 @@ export async function cadastrar_pet(req, res) {
         return res.status(400).json("Nome do pet é obrigatorio")
     }
 
-    if(peso === undefined ||  peso === null || isNaN(Number(idade))){
-        return res.status(400).json("Peso é obrigatorio e deve ser um numero")
+    if(peso === undefined || peso === null || isNaN(Number(peso))){
+        return res.status(400).json("Peso é obrigatorio e deve ser um numero");
     }
 
     const especie_lower = especie.trim().toLowerCase()
@@ -254,7 +254,7 @@ export async function cadastrar_pet(req, res) {
     const sexoFinal = (sexo_lower === "masculino" || sexo_lower === "m") ? "M" : "F"
 
     if(!data_nascimento || typeof data_nascimento != "string"){
-        return res.status(400).json("Data de nascimento é obrigatorio e precisa ser ano-mes-dia")
+        return res.status(400).json("Data de nascimento é obrigatorio")
     }
 
     if(idade === undefined ||  idade === null || isNaN(Number(idade))){
