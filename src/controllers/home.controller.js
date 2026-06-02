@@ -310,7 +310,6 @@ export async function cadastrar_pet(req, res) {
 
 // Editar pet (logado)
 
-// Editar pet
 export async function editar_pet(req, res) {
     const id_pet = Number(req.params.id)
     const { nome, especie, sexo, data_nascimento, idade, peso, outra_especie, observacoes } = req.body

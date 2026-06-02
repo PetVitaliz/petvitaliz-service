@@ -13,6 +13,7 @@ model administrador {
   ADM_EMAIL String @unique@db.VarChar(500)
   ADM_SENHA String @db.VarChar(500)
   ADM_ATIVO Boolean @default(true)
+  ADM_FOTO_URL String? @db.VarChar(1000)
 }
 
 model assinaturas {
@@ -46,10 +47,11 @@ model funcionario {
   nome           String                    @db.VarChar(500)
   sobrenome      String                    @db.VarChar(500)
   especialidade  funcionario_especialidade
-  registro       String                   @unique@db.VarChar(500)
+  email       String                    @unique @db.VarChar(500)
   ativo          Boolean                   @default(true)
   carga          Int                       @default(8)
   senha          String                    @db.VarChar(500)
+  foto_url       String?                   @db.VarChar(1000)
   consulta       consulta[]
 }
 
@@ -117,6 +119,8 @@ enum pet_especie {
 enum funcionario_especialidade {
   veterinario
   tosador
+  recepcionista
+  financeiro
 }
 
 enum usuario_genero {

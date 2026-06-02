@@ -6,7 +6,7 @@ import cloudnary from '../lib/cloudnary.js'
 // Home
 
 export async function home_adm(req, res) {
-    return res.status(200).send({
+    return res.status(200).json({
         pagina: "Home Administrador"
     })
 }
@@ -14,7 +14,7 @@ export async function home_adm(req, res) {
 // LOGOUT
 
 export async function logout_adm(req, res) {
-    return res.clearCookie('token_adm') .status(200).send({
+    return res.clearCookie('token_adm') .status(200).json({
         message: "Logout realizado com sucesso"
     });
 }
@@ -22,63 +22,60 @@ export async function logout_adm(req, res) {
 // CADASTRAR ADM
 
 export async function cadastro_adm(req, res) {
-    const {username, email, senha, ativo} = req.body
+    const { username, email, senha, ativo } = req.body
 
     try {
-        if(!username || typeof username !== "string" || username.length < 2){
-            return res.status(400).send("username é obrigatorio e deve ter pelo menos 2 caracteres")
+        if (!username || typeof username !== "string" || username.length < 2) {
+            return res.status(400).json("username é obrigatorio e deve ter pelo menos 2 caracteres")
         }
-    
-        if (!email || typeof email !== "string"){
-            return res.status(400).send("email é obrigatorio")
+        if (!email || typeof email !== "string") {
+            return res.status(400).json("email é obrigatorio")
         }
-    
-        if(!senha || typeof senha !== "string" || senha.length < 6){
-            return res.status(400).send("senha é obrigatorio e deve ter pelo menos 6 caracteres")
-        }
-        
-        if (ativo === undefined) {
-            return res.status(400).send("ativo é obrigatorio ")
+        if (!senha || typeof senha !== "string" || senha.length < 6) {
+            return res.status(400).json("senha é obrigatorio e deve ter pelo menos 6 caracteres")
         }
 
-        if(typeof ativo !== 'boolean'){
-            return res.status(400).send("ativo deve ser 'true' ou 'false' ")
-        }
-    
+        const isAtivo = ativo === 'true' || ativo === true;
+
         const existing = await prisma.administrador.findFirst({
             where: { ADM_EMAIL: email.trim().toLowerCase() }
         })
-    
         const existing2 = await prisma.administrador.findFirst({
             where: { ADM_NOME: username.trim().toLowerCase() }
         })
-    
-        if(existing){
-            return res.status(400).send("Email ja cadastrado")
+
+        if (existing) return res.status(400).json("Email ja cadastrado")
+        if (existing2) return res.status(400).json("Username ja cadastrado")
+
+        let urlFoto = null
+        if (req.file) {
+            const fName = req.file.originalname.split('.')[0]
+            const fileBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
+            const resultado = await cloudnary.uploader.upload(fileBase64, {
+                folder: 'petvitaliz',
+                public_id: `${Date.now()}-${fName}`,
+                resource_type: 'image'
+            })
+            urlFoto = resultado.secure_url
         }
-    
-        if(existing2){
-            return res.status(400).send("Username ja cadastrado")
-        }
-    
+
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(senha, salt)
-        
-        const administrador = await prisma.administrador.create({
+
+        await prisma.administrador.create({
             data: {
                 ADM_NOME: username.trim(),
-                ADM_ATIVO: ativo,
+                ADM_ATIVO: isAtivo,
                 ADM_EMAIL: email.trim().toLowerCase(),
-                ADM_SENHA: hashedPassword
+                ADM_SENHA: hashedPassword,
+                ADM_FOTO_URL: urlFoto
             }
         })
-    
-        return res.status(201).send("Administrador cadastrado com sucesso")
+
+        return res.status(201).json("Administrador cadastrado com sucesso")
     } catch (error) {
         console.error("erro ao cadastrar adm", error);
-        return res.status(500).send({
-            mensagem: "Erro interno do servidor"
-        })
+        return res.status(500).json({ mensagem: "Erro interno do servidor" })
     }
 }
 
@@ -91,17 +88,14 @@ export async function listar_adm(req, res) {
                 ADM_ID: true,
                 ADM_NOME: true,
                 ADM_EMAIL: true,
-                ADM_ATIVO: true
+                ADM_ATIVO: true,
+                ADM_FOTO_URL: true
             }
         })
-        return res.status(200).send({
-            ADMs: adms
-        })
+        return res.status(200).json({ ADMs: adms })
     } catch (error) {
         console.error("erro ao listar adms", error);
-        return res.status(500).send({
-            mensagem: "Erro interno do servidor"
-        })
+        return res.status(500).json({ mensagem: "Erro interno do servidor" })
     }
 }
 
@@ -113,7 +107,7 @@ export async function listar_adm_esp(req, res) {
     try {
 
         if (!id_adm) {
-        return res.status(404).send("Id invalido")
+        return res.status(404).json("Id invalido")
         }
         
         const existeADM = await prisma.administrador.findUnique({
@@ -121,7 +115,7 @@ export async function listar_adm_esp(req, res) {
         })
 
         if (!existeADM) {
-            return res.status(404).send({
+            return res.status(404).json({
                 mensagem: "Id não encontrado"
             })
         }
@@ -132,16 +126,17 @@ export async function listar_adm_esp(req, res) {
                 ADM_ID: true,
                 ADM_NOME: true,
                 ADM_EMAIL: true,
-                ADM_ATIVO: true
+                ADM_ATIVO: true,
+                ADM_FOTO_URL: true
             }
         })
 
-        return res.status(200).send({
+        return res.status(200).json({
             ADMs: adm
         })
     } catch (error) {
         console.error("erro ao listar adm especifico", error);
-        return res.status(500).send({
+        return res.status(500).json({
             mensagem: "Erro interno do servidor"
         })
     }
@@ -154,86 +149,64 @@ export async function editar_adm(req, res) {
     const { username, email, senha, ativo } = req.body
 
     try {
+        if (!id_adm) return res.status(404).json({ mensagem: "Id invalido" })
 
-        if (!id_adm) {
-            return res.status(404).send({
-                mensagem: "Id invalido"
-            })
+        const existeADM = await prisma.administrador.findUnique({ where: { ADM_ID: id_adm } })
+        if (!existeADM) return res.status(404).json({ mensagem: "Id não encontrado" })
+
+        if (!username || typeof username !== "string" || username.length < 2) {
+            return res.status(400).json("Username é obrigatorio")
         }
-
-        const existeADM = await prisma.administrador.findUnique({
-            where: { ADM_ID: id_adm }
-        })
-
-        if (!existeADM) {
-            return res.status(404).send({
-                mensagem: "Id não encontrado"
-            })
+        if (!email || typeof email !== "string") {
+            return res.status(400).json("Email é obrigatorio")
         }
 
-        if(!username || typeof username !== "string" || username.length < 2){
-            return res.status(400).send("username é obrigatorio e deve ter pelo menos 2 caracteres")
-        }
-    
-        if (!email || typeof email !== "string"){
-            return res.status(400).send("email é obrigatorio")
-        }
-    
-        if(!senha || typeof senha !== "string" || senha.length < 6){
-            return res.status(400).send("senha é obrigatorio e deve ter pelo menos 6 caracteres")
-        }
-        
-        if (ativo === undefined) {
-            return res.status(400).send("ativo é obrigatorio ")
-        }
-
-        if(typeof ativo !== 'boolean'){
-            return res.status(400).send("ativo deve ser 'true' ou 'false' ")
-        }
+        const isAtivo = ativo === 'true' || ativo === true;
 
         const existing = await prisma.administrador.findFirst({
-            where: { ADM_EMAIL: email.trim().toLowerCase(),
-                NOT: { ADM_ID: id_adm }
-             }
+            where: { ADM_EMAIL: email.trim().toLowerCase(), NOT: { ADM_ID: id_adm } }
         })
-    
         const existing2 = await prisma.administrador.findFirst({
-            where: { ADM_NOME: username.trim().toLowerCase(),
-                NOT: { ADM_ID: id_adm }
-             }
+            where: { ADM_NOME: username.trim().toLowerCase(), NOT: { ADM_ID: id_adm } }
         })
-    
-        if(existing){
-            return res.status(400).send("Email ja cadastrado")
-        }
-    
-        if(existing2){
-            return res.status(400).send("Username ja cadastrado")
+
+        if (existing) return res.status(400).json("Email ja cadastrado")
+        if (existing2) return res.status(400).json("Username ja cadastrado")
+
+        let urlFoto = existeADM.ADM_FOTO_URL
+        if (req.file) {
+            const fName = req.file.originalname.split('.')[0]
+            const fileBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
+            const resultado = await cloudnary.uploader.upload(fileBase64, {
+                folder: 'petvitaliz',
+                public_id: `${Date.now()}-${fName}`,
+                resource_type: 'image'
+            })
+            urlFoto = resultado.secure_url
         }
 
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(senha, salt)
-    
+        const dataUpdate = {
+            ADM_NOME: username.trim(),
+            ADM_EMAIL: email.trim().toLowerCase(),
+            ADM_ATIVO: isAtivo,
+            ADM_FOTO_URL: urlFoto
+        }
+
+        if (senha && senha.trim().length >= 6) {
+            const salt = await bcrypt.genSalt(10)
+            dataUpdate.ADM_SENHA = await bcrypt.hash(senha.trim(), salt)
+        }
+
         const novo_ADM = await prisma.administrador.update({
             where: { ADM_ID: id_adm },
-            data: {
-                ADM_NOME: username,
-                ADM_EMAIL: email,
-                ADM_SENHA: hashedPassword,
-                ADM_ATIVO: ativo
-            }
+            data: dataUpdate
         })
-        
-        return res.status(200).send({
-            mensagem: "Administrador editado com sucesso",
-            ADM: novo_ADM
-        })
+
+        return res.status(200).json({ mensagem: "Administrador editado com sucesso", ADM: novo_ADM })
     } catch (error) {
         console.error("erro ao editar adm", error);
-        return res.status(500).send({
-            mensagem: "Erro interno do servidor"
-        })
-    }    
+        return res.status(500).json({ mensagem: "Erro interno do servidor" })
+    }
 }
 
 
@@ -245,7 +218,7 @@ export async function excluir_adm(req, res) {
    try {
 
     if (!id_adm) {
-        return res.status(404).send("Id invalido")
+        return res.status(404).json("Id invalido")
     }
     
     const existeADM = await prisma.administrador.findUnique({
@@ -253,7 +226,7 @@ export async function excluir_adm(req, res) {
     })
 
     if (!existeADM) {
-        return res.status(404).send({
+        return res.status(404).json({
             mensagem: "Id não encontrado"
         })
     }
@@ -271,14 +244,14 @@ export async function excluir_adm(req, res) {
         }
     })
 
-    return res.status(200).send({
+    return res.status(200).json({
         mensagem: "Administrador deletado com sucesso",
         ADMs: adms
     })
     
    } catch (error) {
         console.error("erro ao excluir adm", error);
-        return res.status(500).send({
+        return res.status(500).json({
             mensagem: "Erro interno do servidor"
         })
    }
@@ -288,72 +261,73 @@ export async function excluir_adm(req, res) {
 // Cadastrar Funcionario
 
 export async function cadastar_funcionario(req, res) {
-    const { nome, sobrenome, especialidade, registro, ativo, senha } = req.body
+    const { nome, sobrenome, email, especialidade, ativo, senha } = req.body
 
     try {
-        if(!nome || typeof nome !== "string" || nome.length < 2){
-            return res.status(400).send("nome é obrigatorio e deve ter pelo menos 2 caracteres")
+        if (!nome || typeof nome !== "string" || nome.length < 2) {
+            return res.status(400).json("Nome é obrigatório e deve ter pelo menos 2 caracteres")
         }
 
-        if(!sobrenome || typeof sobrenome !== "string" || sobrenome.length < 2){
-            return res.status(400).send("sobrenome é obrigatorio e deve ter pelo menos 2 caracteres")
+        if (!sobrenome || typeof sobrenome !== "string" || sobrenome.length < 2) {
+            return res.status(400).json("Sobrenome é obrigatório e deve ter pelo menos 2 caracteres")
+        }
+
+        if (!email || typeof email !== "string" || !email.trim().toLowerCase().endsWith('@petvitalizfuncionario.com')) {
+            return res.status(400).json("O e-mail é obrigatório e deve ser corporativo (@petvitalizfuncionario.com)")
         }
     
-        if (!especialidade || typeof especialidade !== "string"){
-            return res.status(400).send("email é obrigatorio")
-        }
-        
-        const especialidade_lower = especialidade.toLowerCase()
-        if(!especialidade_lower || typeof especialidade_lower !== "string" || (especialidade_lower !== "veterinario" && especialidade_lower !== "tosador")){
-            return res.status(400).send("especialidade é obrigatorio, no momento temos apenas 'veterinario' e 'tosador' ")
-        }
-        
-        if (!registro || typeof registro !== "string"){
-            return res.status(400).send("registro é obrigatorio")
+        const espLower = especialidade ? especialidade.toLowerCase().trim() : '';
+        if (espLower !== "veterinario" && espLower !== "tosador" && espLower !== "recepcionista" && espLower !== "financeiro") {
+            return res.status(400).json("Especialidade inválida. Escolha 'veterinario', 'tosador', 'recepcionista' ou 'financeiro' ")
         }
 
-        if(!senha || typeof senha !== "string" || senha.length < 6){
-            return res.status(400).send("senha é obrigatorio e deve ter pelo menos 6 caracteres")
+        if (!senha || typeof senha !== "string" || senha.length < 6) {
+            return res.status(400).json("Senha é obrigatória e deve ter pelo menos 6 caracteres")
         }
         
-        if (ativo === undefined) {
-            return res.status(400).send("ativo é obrigatorio ")
-        }
+        const isAtivo = ativo === 'true' || ativo === true;
 
-        if(typeof ativo !== 'boolean'){
-            return res.status(400).send("ativo deve ser 'true' ou 'false' ")
-        }
-    
+        const emailTratado = email.trim().toLowerCase();
         const existing = await prisma.funcionario.findFirst({
-            where: { registro: registro.trim() }
+            where: { email: emailTratado }
         })
     
-        if(existing){
-            return res.status(400).send("Registro ja cadastrado")
+        if (existing) {
+            return res.status(400).json("E-mail já cadastrado para outro funcionário")
         }
-    
+
+        let urlFoto = null
+        if (req.file) {
+            const fName = req.file.originalname.split('.')[0]
+            const fileBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
+            const resultado = await cloudnary.uploader.upload(fileBase64, {
+                folder: 'petvitaliz_funcionarios',
+                public_id: `${Date.now()}-${fName}`,
+                resource_type: 'image'
+            })
+            urlFoto = resultado.secure_url
+        }
     
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(senha, salt)
         
-        const funcionario = await prisma.funcionario.create({
+        await prisma.funcionario.create({
             data: {
                 nome: nome.trim(),
                 sobrenome: sobrenome.trim(),
-                especialidade: especialidade_lower.trim(),
-                registro: registro.trim(),
-                ativo: ativo,
+                email: emailTratado,
+                especialidade: espLower,
+                ativo: isAtivo,
                 carga: 8,
-                senha: hashedPassword
+                senha: hashedPassword,
+                foto_url: urlFoto
             }
         })
     
-        return res.status(201).send("Funcionario cadastrado com sucesso")
+        return res.status(201).json("Funcionário cadastrado com sucesso")
     } catch (error) {
-        console.error("erro ao cadastrar funcionario", error);
-        return res.status(500).send({
-            mensagem: "Erro interno do servidor"
-        })
+        console.error("Erro ao cadastrar funcionário:", error);
+        return res.status(500).json({ mensagem: "Erro interno do servidor" })
     }
 }
 
@@ -366,22 +340,24 @@ export async function listar_funcionario(req, res) {
                 id_funcionario: true,
                 nome: true,
                 sobrenome: true,
+                email: true,
                 especialidade: true,
-                registro: true,
                 ativo: true,
-                senha: true
+                foto_url: true,
+                carga: true
+            },
+            orderBy: {
+                id_funcionario: 'desc'
             }
         })
-        return res.status(200).send({
-            funcionarios: funcionarios
-        })
+        return res.status(200).json({ funcionarios })
     } catch (error) {
-        console.error("erro ao listar funcionarios", error);
-        return res.status(500).send({
-            mensagem: "Erro interno do servidor"
-        })
+        console.error("Erro ao listar funcionários:", error);
+        return res.status(500).json({ mensagem: "Erro interno do servidor" })
     }
 }
+
+
 
 // Listar funcionario especifico
 
@@ -390,7 +366,7 @@ export async function listar_funcionario_esp(req, res) {
 
     try {
         if (!id_funcionario) {
-            return res.status(404).send("Id invalido")
+            return res.status(404).json("Id invalido")
         }
 
         const existeFuncionario = await prisma.funcionario.findUnique({
@@ -398,7 +374,7 @@ export async function listar_funcionario_esp(req, res) {
         })
 
         if (!existeFuncionario) {
-            return res.status(404).send({
+            return res.status(404).json({
                 mensagem: "Id não encontrado"
             })
         }
@@ -409,117 +385,99 @@ export async function listar_funcionario_esp(req, res) {
                 id_funcionario: true,
                 nome: true,
                 sobrenome: true,
+                email: true,
                 especialidade: true,
-                registro: true,
-                ativo: true
+                ativo: true,
+                foto_url: true,
+                carga: true
             }
         })
 
-        return res.status(200).send({
+        return res.status(200).json({
             funcionario: funcionario
         })
     } catch (error) {
         console.error("erro ao listar funcionario especifico", error);
-        return res.status(500).send({
+        return res.status(500).json({
             mensagem: "Erro interno do servidor"
         })
     }
 }
 
-// Editar funcionario
+// Editar Funcionario
 
 export async function editar_funcionario(req, res) {
     const id_funcionario = Number(req.params.id)
-    const { nome, sobrenome, especialidade, registro, ativo, senha } = req.body
+    const { nome, sobrenome, email, especialidade, ativo, senha } = req.body
 
     try {
+        if (!id_funcionario) return res.status(404).json({ mensagem: "ID inválido" })
 
-        if (!id_funcionario) {
-            return res.status(404).send({
-                mensagem: "ID invalido"
-            })
-        }
-
-        const existeFuncionario = await prisma.funcionario.findUnique({
-            where: { id_funcionario: id_funcionario }
-        })
-
+        const existeFuncionario = await prisma.funcionario.findUnique({ where: { id_funcionario } })
         if (!existeFuncionario) {
-            return res.status(404).send({
-                mensagem: "Id não encontrado"
-            })
+            return res.status(404).json({ mensagem: "Funcionário não encontrado" })
         }
 
-        if(!nome || typeof nome !== "string" || nome.length < 2){
-            return res.status(400).send("nome é obrigatorio e deve ter pelo menos 2 caracteres")
+        if (!nome || typeof nome !== "string" || nome.length < 2) {
+            return res.status(400).json("Nome é obrigatório e deve ter pelo menos 2 caracteres")
         }
 
-        if(!sobrenome || typeof sobrenome !== "string" || sobrenome.length < 2){
-            return res.status(400).send("sobrenome é obrigatorio e deve ter pelo menos 2 caracteres")
-        }
-    
-        if (!especialidade || typeof especialidade !== "string"){
-            return res.status(400).send("email é obrigatorio")
+        if (!sobrenome || typeof sobrenome !== "string" || sobrenome.length < 2) {
+            return res.status(400).json("Sobrenome é obrigatório e deve ter pelo menos 2 caracteres")
         }
         
-        const especialidade_lower = especialidade.toLowerCase()
-        if(!especialidade_lower || typeof especialidade_lower !== "string" || (especialidade_lower !== "veterinario" && especialidade_lower !== "tosador")){
-            return res.status(400).send("especialidade é obrigatorio, no momento temos apenas 'veterinario' e 'tosador' ")
-        }
-        
-        if (!registro || typeof registro !== "string"){
-            return res.status(400).send("registro é obrigatorio")
+            
+        if (!email || !email.trim().toLowerCase().endsWith('@petvitalizfuncionario.com')) {
+            return res.status(400).json("O e-mail deve ser corporativo (@petvitalizfuncionario.com)")
         }
 
-        if(!senha || typeof senha !== "string" || senha.length < 6){
-            return res.status(400).send("senha é obrigatorio e deve ter pelo menos 6 caracteres")
-        }
-        
-        if (ativo === undefined) {
-            return res.status(400).send("ativo é obrigatorio ")
+        const espLower = especialidade ? especialidade.toLowerCase().trim() : '';
+        if (espLower !== "veterinario" && espLower !== "tosador" && espLower !== "recepcionista" && espLower !== "financeiro") {
+            return res.status(400).json("Especialidade inválida. Escolha 'veterinario', 'tosador', 'recepcionista' ou 'financeiro' ")
         }
 
-        if(typeof ativo !== 'boolean'){
-            return res.status(400).send("ativo deve ser 'true' ou 'false' ")
-        }
-    
+        const emailTratado = email.trim().toLowerCase();
         const existing = await prisma.funcionario.findFirst({
-            where: { registro: registro.trim(),
-                NOT: { id_funcionario: id_funcionario }
-             }
+            where: { email: emailTratado, NOT: { id_funcionario } }
         })
-    
-        if(existing){
-            return res.status(400).send("Registro ja cadastrado")
+        if (existing) return res.status(400).json("E-mail já está em uso por outro colaborador")
+
+        let urlFoto = existeFuncionario.foto_url
+        if (req.file) {
+            const fName = req.file.originalname.split('.')[0]
+            const fileBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
+            const resultado = await cloudnary.uploader.upload(fileBase64, {
+                folder: 'petvitaliz_funcionarios',
+                public_id: `${Date.now()}-${fName}`,
+                resource_type: 'image'
+            })
+            urlFoto = resultado.secure_url
         }
-    
-    
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(senha, salt)
-        
-        const novo_funcionario = await prisma.funcionario.update({
-            where: { id_funcionario: id_funcionario },
-            data: {
-                nome: nome.trim(),
-                sobrenome: sobrenome.trim(),
-                especialidade: especialidade_lower.trim(),
-                registro: registro.trim(),
-                ativo: ativo,
-                carga: 8,
-                senha: hashedPassword
-            }
+
+        const isAtivo = ativo === 'true' || ativo === true;
+        const dataUpdate = {
+            nome: nome.trim(),
+            email: emailTratado,
+            especialidade: espLower,
+            ativo: isAtivo,
+            foto_url: urlFoto
+        }
+
+        if (senha && senha.trim().length >= 6) {
+            const salt = await bcrypt.genSalt(10)
+            dataUpdate.senha = await bcrypt.hash(senha.trim(), salt)
+        }
+
+        const atualizado = await prisma.funcionario.update({
+            where: { id_funcionario },
+            data: dataUpdate
         })
 
-        return res.status(200).send({
-            mensagem: "Funcionario editado com sucesso",
-            funcionario: novo_funcionario
-        })
+        return res.status(200).json({ mensagem: "Funcionário editado com sucesso", funcionario: atualizado })
     } catch (error) {
-        console.error("erro ao editar funcionario", error);
-        return res.status(500).send({
-            mensagem: "Erro interno do servidor"
-        })
-    }    
+        console.error("Erro ao editar funcionário:", error);
+        return res.status(500).json({ mensagem: "Erro interno do servidor" })
+    }
 }
 
 
@@ -531,7 +489,7 @@ export async function excluir_funcionario(req, res) {
    try {
 
     if (!id_funcionario) {
-        return res.status(404).send("Id invalido")
+        return res.status(404).json("Id invalido")
     }
 
     const existeFuncionario = await prisma.funcionario.findUnique({
@@ -539,7 +497,7 @@ export async function excluir_funcionario(req, res) {
     })
 
     if (!existeFuncionario) {
-        return res.status(404).send({
+        return res.status(404).json({
             mensagem: "Id não encontrado"
         })
     }
@@ -562,14 +520,14 @@ export async function excluir_funcionario(req, res) {
           } 
     })
 
-    return res.status(200).send({
+    return res.status(200).json({
         mensagem: "Funcionario deletado com sucesso",
         funcionarios: funcionario
     })
     
    } catch (error) {
         console.error("erro ao excluir funcionario", error);
-        return res.status(500).send({
+        return res.status(500).json({
             mensagem: "Erro interno do servidor"
         })
    }
@@ -582,23 +540,23 @@ export async function cadastro_produto(req, res) {
 
     try {
         if(!nome || typeof nome !== "string" || nome.length < 5){
-            return res.status(400).send("nome é obrigatorio e deve ter pelo menos 5 caracteres")
+            return res.status(400).json("Nome é obrigatorio e deve ter pelo menos 5 caracteres")
         }
     
         if (!descricao || typeof descricao !== "string"){
-            return res.status(400).send("descricao é obrigatorio")
+            return res.status(400).json("Descrição é obrigatoria")
         }
     
         if(!beneficios || typeof beneficios !== "string" || beneficios.length < 6){
-            return res.status(400).send("beneficios é obrigatorio e deve ter pelo menos 6 caracteres")
+            return res.status(400).json("Beneficios é obrigatorio e deve ter pelo menos 6 caracteres")
         }
         
         if (preco === undefined) {
-            return res.status(400).send("preco é obrigatorio ")
+            return res.status(400).json("Preço é obrigatorio")
         }
 
         if(typeof preco !== 'number'){
-            return res.status(400).send("preco deve ser um numero")
+            return res.status(400).json("Preço deve ser um numero")
         }
         
         const produto = await prisma.produtos.create({
@@ -610,10 +568,10 @@ export async function cadastro_produto(req, res) {
             }
         })
     
-        return res.status(201).send("Produto cadastrado com sucesso")
+        return res.status(201).json("Produto cadastrado com sucesso")
     } catch (error) {
         console.error("erro ao cadastrar produto", error);
-        return res.status(500).send({
+        return res.status(500).json({
             mensagem: "Erro interno do servidor"
         })
     }
@@ -632,12 +590,12 @@ export async function listar_produtos(req, res) {
                 preco: true
             }
         })
-        return res.status(200).send({
+        return res.status(200).json({
             produtos: produtos
         })
     } catch (error) {
         console.error("erro ao listar produtos", error);
-        return res.status(500).send({
+        return res.status(500).json({
             mensagem: "Erro interno do servidor"
         })
     }
@@ -650,7 +608,7 @@ export async function listar_produto_especifico(req, res) {
 
     try {
         if (!id_produto) {
-            return res.status(404).send({
+            return res.status(404).json({
                 mensagem: "ID invalido"
             })
         }
@@ -660,7 +618,7 @@ export async function listar_produto_especifico(req, res) {
         })
 
         if (!existeProduto) {
-            return res.status(404).send({
+            return res.status(404).json({
                 mensagem: "Id não encontrado"
             })
         }
@@ -675,12 +633,12 @@ export async function listar_produto_especifico(req, res) {
             }
         })
 
-        return res.status(200).send({
+        return res.status(200).json({
             produto: produto
         })
     } catch (error) {
         console.error("erro ao listar produto especifico", error);
-        return res.status(500).send({
+        return res.status(500).json({
             mensagem: "Erro interno do servidor"
         })
     }
@@ -697,7 +655,7 @@ export async function editar_produto(req, res) {
     try {
 
         if (!id_produto) {
-            return res.status(404).send({
+            return res.status(404).json({
                 mensagem: "ID invalido"
             })
         }
@@ -707,29 +665,29 @@ export async function editar_produto(req, res) {
         })
 
         if (!existeProduto) {
-            return res.status(404).send({
+            return res.status(404).json({
                 mensagem: "Id não encontrado"
             })
         }
 
         if(!nome || typeof nome !== "string" || nome.length < 5){
-            return res.status(400).send("nome é obrigatorio e deve ter pelo menos 5 caracteres")
+            return res.status(400).json("nome é obrigatorio e deve ter pelo menos 5 caracteres")
         }
     
         if (!descricao || typeof descricao !== "string"){
-            return res.status(400).send("descricao é obrigatorio")
+            return res.status(400).json("descricao é obrigatorio")
         }
     
         if(!beneficios || typeof beneficios !== "string" || beneficios.length < 6){
-            return res.status(400).send("beneficios é obrigatorio e deve ter pelo menos 6 caracteres")
+            return res.status(400).json("beneficios é obrigatorio e deve ter pelo menos 6 caracteres")
         }
         
         if (preco === undefined) {
-            return res.status(400).send("preco é obrigatorio")
+            return res.status(400).json("preco é obrigatorio")
         }
 
         if(typeof preco !== 'number'){
-            return res.status(400).send("preco deve ser um numero")
+            return res.status(400).json("preco deve ser um numero")
         }
         
         const novo_Produto = await prisma.produtos.update({
@@ -742,13 +700,13 @@ export async function editar_produto(req, res) {
             }
         })
     
-        return res.status(201).send({
+        return res.status(201).json({
             mensagem: "Produto atualizado com sucesso",
             novo_Produto: novo_Produto
         })
     } catch (error) {
         console.error("erro ao editar produto", error);
-        return res.status(500).send({
+        return res.status(500).json({
             mensagem: "Erro interno do servidor"
         })
     }   
@@ -762,7 +720,7 @@ export async function excluir_produto(req, res) {
    try {
 
     if (!id_produto) {
-        return res.status(404).send("Id invalido")
+        return res.status(404).json("Id invalido")
     }
 
     const existeProduto = await prisma.produtos.findUnique({
@@ -770,7 +728,7 @@ export async function excluir_produto(req, res) {
     })
 
     if (!existeProduto) {
-        return res.status(404).send({
+        return res.status(404).json({
             mensagem: "Id não encontrado"
         })
     }
@@ -791,14 +749,14 @@ export async function excluir_produto(req, res) {
           } 
     })
 
-    return res.status(200).send({
+    return res.status(200).json({
         mensagem: "Produto deletado com sucesso",
         Produtos: produtos
     })
     
    } catch (error) {
         console.error("erro ao excluir produto", error);
-        return res.status(500).send({
+        return res.status(500).json({
             mensagem: "Erro interno do servidor"
         })
    }
@@ -809,7 +767,7 @@ export async function excluir_produto(req, res) {
 export async function uploadImagem(req, res) {
     try {
         if (!req.file) {
-            return res.status(400).send({
+            return res.status(400).json({
                 mensagem: "Nenhum arquivo enviado"
             })
         }
@@ -823,7 +781,7 @@ export async function uploadImagem(req, res) {
             resource_type: 'image'
         })
 
-        return res.status(200).send({
+        return res.status(200).json({
             mensagem: "Upload realizado com sucesso",
             url: resultadoCloudnary.secure_url
         })
