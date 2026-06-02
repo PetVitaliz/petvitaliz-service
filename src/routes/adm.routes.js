@@ -65,7 +65,7 @@ router.get("/logout", verificarTokenAdmin, logout_adm)
  *       401:
  *         description: Acesso não autorizado
  */
-router.post("/listar/adm/cadastrar", verificarTokenAdmin, cadastro_adm)
+router.post("/listar/adm/cadastrar", verificarTokenAdmin, uploadConfig.single('image'), cadastro_adm)
 
 
 /**
@@ -84,7 +84,7 @@ router.post("/listar/adm/cadastrar/debug", cadastro_adm)
 
 router.get("/listar/adm", verificarTokenAdmin, listar_adm)
 router.get("/listar/adm/:id", verificarTokenAdmin, listar_adm_esp)
-router.put("/listar/adm/editar/:id", verificarTokenAdmin, editar_adm)
+router.put("/listar/adm/editar/:id", verificarTokenAdmin, uploadConfig.single('image'), editar_adm)
 router.delete("/listar/adm/excluir/:id", verificarTokenAdmin, excluir_adm)
 
 /**
@@ -121,10 +121,10 @@ router.delete("/listar/adm/excluir/:id", verificarTokenAdmin, excluir_adm)
  *         description: Acesso não autorizado
  */
 
-router.post("/listar/funcionario/cadastrar", verificarTokenAdmin, cadastar_funcionario)
+router.post("/listar/funcionario/cadastrar", verificarTokenAdmin, uploadConfig.single('image'), cadastar_funcionario)
 router.get("/listar/funcionario", verificarTokenAdmin, listar_funcionario)
 router.get("/listar/funcionario/:id", verificarTokenAdmin, listar_funcionario_esp)
-router.put("/listar/funcionario/editar/:id", verificarTokenAdmin, editar_funcionario)
+router.put("/listar/funcionario/editar/:id", verificarTokenAdmin, uploadConfig.single('image'), editar_funcionario)
 router.delete("/listar/funcionario/excluir/:id", verificarTokenAdmin, excluir_funcionario)
 
 
