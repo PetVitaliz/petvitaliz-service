@@ -209,7 +209,8 @@ export async function login_adm(req, res) {
         return res.status(200).cookie('token_adm', token_adm, {
             httpOnly: true,
             secure: true,
-            sameSite: 'strict',
+            sameSite: 'none',
+            partitioned: true,
             maxAge: 3 * 24 * 60 * 60 * 1000
         }).json({
             mensagem: "Login como ADM realizado com sucesso",
@@ -284,6 +285,8 @@ export async function login_funcionario(req, res) {
         return res.status(200).cookie('token_funcionario', token_funcionario, {
             httpOnly: true,
             secure: true,
+            sameSite: 'none',
+            partitioned: true,
             maxAge: 60 * 60 * 1000
          }).json({
             message: "Login realizado com sucesso",
