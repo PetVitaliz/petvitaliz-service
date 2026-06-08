@@ -458,6 +458,7 @@ export async function editar_funcionario(req, res) {
         const dataUpdate = {
             nome: nome.trim(),
             email: emailTratado,
+            sobrenome: sobrenome,
             especialidade: espLower,
             ativo: isAtivo,
             foto_url: urlFoto

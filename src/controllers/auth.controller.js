@@ -138,7 +138,6 @@ export async function login_usuario(req, res) {
         return res.status(200).cookie('token', token_user, {
             httpOnly: true,
             secure: true,
-            sameSite: 'none',
             maxAge: 3 * 24 * 60 * 60 * 1000
          }).json({
             mensagem: "Login realizado com sucesso",
@@ -387,14 +386,16 @@ export async function confirmar_codigo(req, res) {
             where: { id: existing.id }
         });
 
-        return res.status(200).cookie('token_reset', reset_senha_token,{
+        return res.status(200).cookie('token_reset', reset_senha_token, {
             httpOnly: true,
-            secure: false,
+            secure: true,
+            sameSite: 'none',
+            partitioned: true,
             maxAge: 9 * 60 * 1000
         }).json({
-            mensagem: "Acesso liberado"
-        })
-
+            mensagem: "Acesso liberado",
+            token_reset: reset_senha_token
+        });
     } catch (error) {
         console.log("Erro no reset_senha:", error);
         return res.status(500).json({
