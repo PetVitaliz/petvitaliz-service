@@ -217,7 +217,7 @@ export async function listar_pet(req, res) {
         return res.status(200).send({
             mensagem: "Pagina de listar pet",
             usuario: `${nome} ${sobrenome}`,
-            Pets: pets
+            pets: pets
         })
     } catch (error) {
         console.error("Erro ao listar pets no banco:", error)

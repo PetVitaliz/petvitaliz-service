@@ -205,22 +205,9 @@ router.get("/delete/pet/:id", excluir_pet_n_logada)
  */
 router.delete("/user/listar/pet/delete/:id", verificarToken, excluir_pet)
 
+router.post("/agendamento", verificarToken, agendamento);
 
-/**
- * @swagger
- * /agendamento:
- *   get:
- *     summary: Exibe informações sobre agendamentos
- *     tags: [Agendamento]
- */
-router.get("/agendamento", agendamento_n_logada)
-
-
-router.post("/user/agendamento", verificarToken, agendamento)
-
-router.get("/consultas", consultas_n_logado)
-
-router.get("/user/consultas", verificarToken, consultas)
+router.get("/consultas", verificarToken, consultas);
 
 router.post("/user/planos/pagamento", verificarToken, pagamento)
 
