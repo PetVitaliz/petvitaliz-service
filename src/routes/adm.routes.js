@@ -129,7 +129,7 @@ router.delete("/listar/funcionario/excluir/:id", verificarTokenAdmin, excluir_fu
 
 
 router.post("/listar/produtos/cadastrar", verificarTokenAdmin, cadastro_produto)
-router.get("/listar/produtos", verificarTokenAdmin, listar_produtos)
+router.get("/listar/produtos", listar_produtos)
 router.get("/listar/produtos/:id", verificarTokenAdmin, listar_produto_especifico)
 router.put("/listar/produtos/editar/:id", verificarTokenAdmin, editar_produto)
 router.delete("/listar/produtos/excluir/:id", verificarTokenAdmin, excluir_produto)
