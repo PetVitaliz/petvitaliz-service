@@ -11,6 +11,41 @@ export async function home_adm(req, res) {
     })
 }
 
+// Home 2 (so pra mostrar as consultas)
+
+export async function home_consultas_adm(req, res) {
+    try {
+        const fusoLocal = new Date();
+        const ano = fusoLocal.getFullYear();
+        const mes = String(fusoLocal.getMonth() + 1).padStart(2, '0');
+        const dia = String(fusoLocal.getDate()).padStart(2, '0');
+        const hojeString = `${ano}-${mes}-${dia}`;
+
+        const consultasHoje = await prisma.consulta.findMany({
+            where: {
+                data_consulta: {
+                    gte: new Date(`${hojeString}T00:00:00.000Z`),
+                    lte: new Date(`${hojeString}T23:59:59.999Z`)
+                }
+            },
+            include: {
+                pet: true,
+                funcionario: {
+                    select: { nome: true }
+                }
+            },
+            orderBy: { hora_inicio: 'asc' }
+        });
+
+        return res.status(200).send({
+            consultas: consultasHoje
+        });
+    } catch (error) {
+        console.log("Erro ao buscar consultas na home do ADM:", error);
+        return res.status(500).send({ mensagem: "Erro interno do servidor" });
+    }
+}
+
 // LOGOUT
 
 export async function logout_adm(req, res) {
@@ -791,5 +826,55 @@ export async function uploadImagem(req, res) {
         return res.status(500).json({
             mensagem: "Erro interno do servidor" 
         })
+    }
+}
+
+// Listar clientes (pet + tutor)
+
+export async function listar_clientes_adm(req, res) {
+    try {
+        const petsComTutores = await prisma.pet.findMany({
+            include: {
+                usuario: {
+                    select: {
+                        nome: true,
+                        sobrenome: true,
+                        telefone: true,
+                        email: true
+                    }
+                }
+            },
+            orderBy: {
+                nome: 'asc'
+            }
+        });
+
+        const clientesFormatados = petsComTutores.map(p => {
+            const nomeTutor = p.usuario ? `${p.usuario.nome} ${p.usuario.sobrenome}`.trim() : 'Sem Tutor';
+            
+            let statusSimulado = 'Ativo';
+            if (p.observacoes && p.observacoes.toLowerCase().includes('tratamento')) {
+                statusSimulado = 'Em tratamento';
+            }
+
+            return {
+                id_pet: p.id_pet,
+                nome: p.nome,
+                pet: p.outra_especie || p.especie,
+                idade: `${p.idade} ${p.idade === 1 ? 'ano' : 'anos'}`,
+                tutor: nomeTutor,
+                telefone: p.usuario ? p.usuario.telefone : 'Não cadastrado',
+                especie: p.especie === 'cachorro' ? 'Cão' : 'Gato',
+                status: statusSimulado,
+                observacoes: p.observacoes || 'Nenhuma observação clínica registrada.'
+            };
+        });
+
+        return res.status(200).json({
+            clientes: clientesFormatados
+        });
+    } catch (error) {
+        console.error("Erro ao listar diretório de clientes para ADM:", error);
+        return res.status(500).json({ mensagem: "Erro interno do servidor" });
     }
 }

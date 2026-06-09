@@ -75,3 +75,34 @@ export async function emailReset_Enviado(nome, sobrenome, emailDestinatario, cod
         console.error("Erro ao enviar e-mail de reset:", error);
     }
 }
+
+
+export async function emailPlanoAssinado(nome, sobrenome, emailDestinatario, nomePlano, precoPlano) {
+    const emailConfirmacao = {
+        from: `"Financeiro Petvitaliz" <${process.env.EMAIL_USER}>`,
+        to: emailDestinatario,
+        subject: "Sua assinatura foi confirmada!",
+        html: `
+        <h2>Olá, <strong>${nome} ${sobrenome}</strong>!</h2>
+        <p>Estamos muito felizes em informar que a contratação do seu plano foi processada com sucesso.</p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        <p><strong>Detalhes da Assinatura:</strong></p>
+        <ul>
+            <li><strong>Plano:</strong> ${nomePlano}</li>
+            <li><strong>Valor:</strong> R$ ${precoPlano} / mês</li>
+            <li><strong>Status do Pagamento:</strong> Confirmado (Cartão de Crédito)</li>
+        </ul>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        <p>A partir de agora, os benefícios já estão vinculados à sua conta. Se precisar de qualquer ajuda ou quiser agendar procedimentos, acesse seu painel.</p>
+        <br>
+        <p><strong>Atenciosamente,</strong><br>Equipe Financeira PetVitaliz</p>
+        `
+    };
+
+    try {
+        await configOptions.sendMail(emailConfirmacao);
+        console.log(`E-mail de confirmação de plano enviado para: ${emailDestinatario}`);
+    } catch (error) {
+        console.error("Erro ao enviar e-mail de confirmação de plano:", error);
+    }
+}
