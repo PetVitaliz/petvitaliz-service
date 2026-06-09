@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { cadastar_funcionario, cadastro_adm, cadastro_produto, editar_adm, editar_funcionario, editar_produto, excluir_adm, excluir_funcionario, excluir_produto, home_adm, listar_adm, listar_adm_esp, listar_funcionario, listar_funcionario_esp, listar_produto_especifico, listar_produtos, logout_adm, uploadImagem } from '../controllers/adm.controller.js'
+import { cadastar_funcionario, cadastro_adm, cadastro_produto, editar_adm, editar_funcionario, editar_produto, excluir_adm, excluir_funcionario, excluir_produto, home_adm, home_consultas_adm, listar_adm, listar_adm_esp, listar_clientes_adm, listar_funcionario, listar_funcionario_esp, listar_produto_especifico, listar_produtos, logout_adm, uploadImagem } from '../controllers/adm.controller.js'
 import { verificarTokenAdmin } from '../middlewares/logger.middleware.js'
 import { uploadConfig } from '../middlewares/upload.middleware.js'
 
@@ -135,5 +135,7 @@ router.put("/listar/produtos/editar/:id", verificarTokenAdmin, editar_produto)
 router.delete("/listar/produtos/excluir/:id", verificarTokenAdmin, excluir_produto)
 
 router.post("/upload", verificarTokenAdmin, uploadConfig.single('image'), uploadImagem)
+router.get("/consultas", verificarTokenAdmin, home_consultas_adm);
+router.get("/listar/clientes", verificarTokenAdmin, listar_clientes_adm);
 
 export default router

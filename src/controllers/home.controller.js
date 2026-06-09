@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { prisma } from '../lib/prisma.js'
-import { emailContatoEnviado } from '../lib/email.js'
+import { emailContatoEnviado, emailReset_Enviado, emailPlanoAssinado } from '../lib/email.js'  
 import cloudnary from '../lib/cloudnary.js'
 
 // PARTE NAO LOGADA
@@ -232,7 +232,6 @@ export async function listar_pet(req, res) {
 export async function cadastrar_pet(req, res) {
     const { nome, especie, sexo, data_nascimento, idade, outra_especie, peso } = req.body
     const id_usuario = req.usuarioLogado.id
-    
 
     if (!nome || typeof nome !== "string"){
         return res.status(400).json("Nome do pet é obrigatorio")
@@ -248,63 +247,47 @@ export async function cadastrar_pet(req, res) {
     }
 
     const sexo_lower = sexo ? sexo.toLowerCase().trim() : ''
-    if(!sexo_lower || typeof sexo_lower !== "string" || (sexo_lower !== "m" && sexo_lower !== "f")){
-        return res.status(400).json("Gênero é obrigatorio e deve ser 'm' ou 'f' ")
-    }
-    const sexoFinal = (sexo_lower === "masculino" || sexo_lower === "m") ? "M" : "F"
+    const sexoFinal = (sexo_lower === "macho" || sexo_lower === "m") ? "M" : "F"
 
     if(!data_nascimento || typeof data_nascimento != "string"){
         return res.status(400).json("Data de nascimento é obrigatorio")
     }
 
-    if(idade === undefined ||  idade === null || isNaN(Number(idade))){
-        return res.status(400).json("Idade é obrigatoria e deve ser um numero")
-    }
-
-    if (especie_lower == "outro") {
-        if (!outra_especie) {
-            return res.status(400).json("Outra especie é obrigatorio quando selecionado outro")
-        }
-    }
-
     try {
         let urlFotoCloudnary = null
-
         if (req.file) {
             const fName = req.file.originalname.split('.')[0]
             const fileBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
-
             const resultadoCloudnary = await cloudnary.uploader.upload(fileBase64, {
                 folder: 'petvitaliz',
                 public_id: `${Date.now()}-${fName}`,
                 resource_type: 'image'
             })
-
             urlFotoCloudnary = resultadoCloudnary.secure_url
         }
 
-    const pet = await prisma.pet.create({
-        data: {
-            nome: nome.trim(),
-            especie: especie_lower,
-            outra_especie: especie_lower === "outro" ? outra_especie.trim() : null,
-            sexo: sexoFinal,
-            data_nascimento: new Date(data_nascimento.trim()),
-            idade: Number(idade) || 0,
-            peso: peso ? Number(peso) : null,
-            foto_url: urlFotoCloudnary,
-            usuario: {
-                connect: {id_usuario: Number(id_usuario)}
-            }
-        }
-    })
+        const dataNascimentoTratada = new Date(`${data_nascimento}T00:00:00.000Z`);
 
-    return res.status(201).json("Pet cadastrado com sucesso")
-   } catch (error) {
-        console.error("Erro ao cadastrar pet:", error)
-        return res.status(500).json({
-            mensagem: "Erro interno do servidor"
+        await prisma.pet.create({
+            data: {
+                nome: nome.trim(),
+                especie: especie_lower,
+                outra_especie: especie_lower === "outro" ? outra_especie.trim() : null,
+                sexo: sexoFinal,
+                data_nascimento: dataNascimentoTratada,
+                idade: Number(idade) || 0,
+                peso: Number(peso),
+                foto_url: urlFotoCloudnary,
+                usuario: {
+                    connect: { id_usuario: Number(id_usuario) }
+                }
+            }
         })
+
+        return res.status(201).json("Pet cadastrado com sucesso")
+    } catch (error) {
+        console.error("Erro ao cadastrar pet:", error)
+        return res.status(500).json({ mensagem: "Erro interno do servidor" })
     }
 }
 
@@ -315,48 +298,18 @@ export async function editar_pet(req, res) {
     const { nome, especie, sexo, data_nascimento, idade, peso, outra_especie, observacoes } = req.body
     
     try {
-        if (!id_pet) {
-            return res.status(400).send({
-                mensagem: "Id inválido"
-            })
-        }
+        if (!id_pet) return res.status(400).send({ mensagem: "Id inválido" })
 
-        const existePet = await prisma.pet.findUnique({
-            where: { id_pet: id_pet }
-        })
+        const existePet = await prisma.pet.findUnique({ where: { id_pet: id_pet } })
+        if (!existePet) return res.status(404).send({ mensagem: "Pet não encontrado" })
 
-        if (!existePet) {
-            return res.status(404).send({
-                mensagem: "Pet não encontrado"
-            })
-        }
-
-        if (!nome || typeof nome !== "string"){
-            return res.status(400).send("Nome do pet é obrigatório")
-        }
+        if (!nome || typeof nome !== "string") return res.status(400).send("Nome é obrigatório")
 
         const especie_lower = especie ? especie.trim().toLowerCase() : ''
-        if (especie_lower !== "cachorro" && especie_lower !== "gato" && especie_lower !== "ave" && especie_lower !== "coelho" && especie_lower !== "outro") {
-            return res.status(400).send("Espécie inválida")
-        }
-
-        if (especie_lower === "outro" && !outra_especie) {
-            return res.status(400).send("Especificar a outra espécie é obrigatório")
-        }
-
         const sexo_lower = sexo ? sexo.toLowerCase().trim() : ''
-        if(!sexo_lower || (sexo_lower !== "m" && sexo_lower !== "f")){
-            return res.status(400).send("Gênero é obrigatório e deve ser 'm' ou 'f' ")
-        }
-        const sexoFinal = sexo_lower.toUpperCase()
+        const sexoFinal = (sexo_lower === "m" || sexo_lower === "macho") ? "M" : "F";
 
-        if(!data_nascimento || typeof data_nascimento !== "string"){
-            return res.status(400).send("Data de nascimento é obrigatória (ano-mes-dia)")
-        }
-
-        if(idade === undefined || idade === null || isNaN(Number(idade))){
-            return res.status(400).send("Idade é obrigatória e deve ser um número")
-        }
+        const dataNascimentoTratada = new Date(`${data_nascimento}T00:00:00.000Z`);
 
         const novoPet = await prisma.pet.update({
             where: { id_pet: id_pet },
@@ -365,21 +318,17 @@ export async function editar_pet(req, res) {
                 especie: especie_lower,
                 outra_especie: especie_lower === "outro" ? outra_especie.trim() : null,
                 sexo: sexoFinal,
-                data_nascimento: new Date(data_nascimento.trim()),
+                data_nascimento: dataNascimentoTratada,
                 idade: Number(idade),
                 peso: peso ? Number(peso) : null,
                 observacoes: observacoes
             }
         })
 
-        return res.status(200).send({
-            pet: novoPet
-        })
+        return res.status(200).send({ pet: novoPet })
     } catch (error) {
         console.log("Erro ao editar pet:", error);
-        return res.status(500).send({
-            mensagem: "Erro interno do servidor"
-        })
+        return res.status(500).send({ mensagem: "Erro interno do servidor" })
     }
 }
 
@@ -549,16 +498,52 @@ export async function consultas(req, res) {
     
 }
 
+// Cancelar consulta
+
+export async function cancelar_agendamento(req, res) {
+    const id_consulta = Number(req.params.id);
+    const id_usuario = req.usuarioLogado.id;
+
+    try {
+        const consultaExiste = await prisma.consulta.findFirst({
+            where: {
+                id_consulta: id_consulta,
+                pet: { id_usuario: id_usuario }
+            }
+        });
+
+        if (!consultaExiste) {
+            return res.status(404).json({ mensagem: "Agendamento não encontrado." });
+        }
+
+        await prisma.$transaction([
+            prisma.consulta.delete({
+                where: { id_consulta: id_consulta }
+            }),
+            prisma.funcionario.update({
+                where: { id_funcionario: consultaExiste.id_funcionario },
+                data: { carga: { increment: 1 } }
+            })
+        ]);
+
+        return res.status(200).json({ mensagem: "Agendamento cancelado com sucesso." });
+    } catch (error) {
+        console.error("Erro ao cancelar agendamento:", error);
+        return res.status(500).json({ mensagem: "Erro interno do servidor ao cancelar." });
+    }
+}
+
 // Pagamento
 
 export async function pagamento(req, res) {
-    const id_usuario = req.usuarioLogado.id
-    const { id_produto } = req.body
+    const id_usuario = req.usuarioLogado.id;
+    const { nome, sobrenome, email } = req.usuarioLogado;
+    const { id_produto } = req.body;
 
     try {
         if (!id_produto) {
             return res.status(400).send({
-                mensagem: "Id invalido"
+                mensagem: "Id inválido"
             });
         }
 
@@ -574,12 +559,12 @@ export async function pagamento(req, res) {
 
         const assinaturaAtual = await prisma.assinaturas.findFirst({
             where: { id_usuario: id_usuario }
-        })
+        });
 
         if (assinaturaAtual) {
             return res.status(400).send({
-                mensagem: "Você ja possui um plano, cancele o plano atual para assinar outro"
-            })
+                mensagem: "Você já possui um plano, cancele o plano atual para assinar outro"
+            });
         }
 
         await prisma.assinaturas.create({
@@ -588,16 +573,24 @@ export async function pagamento(req, res) {
                 id_produto: Number(id_produto),
                 data_assinatura: new Date()
             }
-        })
+        });
+
+        emailPlanoAssinado(
+            nome, 
+            sobrenome, 
+            email, 
+            planoExiste.nome, 
+            planoExiste.preco.toString()
+        );
 
         return res.status(200).send({
             mensagem: "Plano assinado com sucesso"
-        })
+        });
     } catch (error) {
         console.log("Erro ao assinar um plano:", error);
         return res.status(500).send({
             mensagem: "Erro interno do servidor"
-        })
+        });
     }
 }
 
