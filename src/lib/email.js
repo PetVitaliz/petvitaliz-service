@@ -1,21 +1,21 @@
 import nodemailer from 'nodemailer'
 
 const configOptions = nodemailer.createTransport({
-    host: "smtp.gmail.com",
+    host: "74.125.143.109", 
     port: 587,
     secure: false,
     requireTLS: true,
-    family: 4, 
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     },
     tls: {
+        servername: 'smtp.gmail.com', 
         rejectUnauthorized: false
     },
-    connectionTimeout: 10000, 
-    greetingTimeout: 10000,
-    socketTimeout: 10000
+    connectionTimeout: 15000, 
+    greetingTimeout: 15000,
+    socketTimeout: 15000
 })
 
 
