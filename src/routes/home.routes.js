@@ -183,7 +183,7 @@ router.get("/editar/pet/:id", editar_pet_n_logada)
  *               data_nascimento:
  *                 type: string
  */
-router.put("/user/listar/pet/editar/:id", verificarToken, editar_pet)
+router.put("/user/listar/pet/editar/:id", verificarToken, uploadConfig.single('image'), editar_pet)
 
 
 /**

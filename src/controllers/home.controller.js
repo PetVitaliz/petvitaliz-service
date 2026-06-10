@@ -311,6 +311,19 @@ export async function editar_pet(req, res) {
 
         const dataNascimentoTratada = new Date(`${data_nascimento}T00:00:00.000Z`);
 
+        let urlFotoCloudnary = existePet.foto_url;
+
+        if (req.file) {
+            const fName = req.file.originalname.split('.')[0]
+            const fileBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
+            const resultadoCloudnary = await cloudnary.uploader.upload(fileBase64, {
+                folder: 'petvitaliz',
+                public_id: `${Date.now()}-${fName}`,
+                resource_type: 'image'
+            })
+            urlFotoCloudnary = resultadoCloudnary.secure_url
+        }
+
         const novoPet = await prisma.pet.update({
             where: { id_pet: id_pet },
             data: {
@@ -321,7 +334,8 @@ export async function editar_pet(req, res) {
                 data_nascimento: dataNascimentoTratada,
                 idade: Number(idade),
                 peso: peso ? Number(peso) : null,
-                observacoes: observacoes
+                observacoes: observacoes,
+                foto_url: urlFotoCloudnary
             }
         })
 
