@@ -437,6 +437,23 @@ export async function agendamento(req, res) {
             })
         }
 
+        const petOcupado = await prisma.consulta.findFirst({
+            where: {
+                id_pet: Number(id_pet),
+                data_consulta: new Date(data_consulta),
+                hora_inicio: hora_inicio,
+                status: { 
+                    in: ['em_espera', 'em_andamento']
+                }
+            }
+        });
+
+        if (petOcupado) {
+            return res.status(409).send({
+                mensagem: "Seu pet já possui um agendamento neste horário."
+            });
+        }
+
         await prisma.$transaction([
             prisma.consulta.create({
                 data: {
@@ -672,5 +689,18 @@ export async function cancelar_plano(req, res) {
         return res.status(500).send({
             mensagem: "Erro interno do servidor"
         })
+    }
+}
+
+export async function buscarPerfil(req, res) {
+    const id_usuario = req.usuarioLogado.id;
+    try {
+        const usuario = await prisma.usuario.findUnique({
+            where: { id_usuario: id_usuario },
+            select: { nome: true, sobrenome: true, email: true, CPF: true }
+        });
+        return res.status(200).send(usuario);
+    } catch (error) {
+        return res.status(500).send({ mensagem: "Erro ao buscar dados" });
     }
 }

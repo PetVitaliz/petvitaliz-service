@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { agendamento, agendamento_n_logada, cadastrar_pet, cadastrar_pet_n_logada, cancelar_agendamento, cancelar_plano, consultas, consultas_n_logado, contato, contato_n_logada, editar_pet, editar_pet_n_logada, excluir_pet, excluir_pet_n_logada, home, home_n_logada, listar_pet, listar_pet_n_logada, pagamento, planos, servicos, servicos_emergencia, servicos_emergencia_n_logada, servicos_n_logado } from '../controllers/home.controller.js'
+import { agendamento, agendamento_n_logada, buscarPerfil, cadastrar_pet, cadastrar_pet_n_logada, cancelar_agendamento, cancelar_plano, consultas, consultas_n_logado, contato, contato_n_logada, editar_pet, editar_pet_n_logada, excluir_pet, excluir_pet_n_logada, home, home_n_logada, listar_pet, listar_pet_n_logada, pagamento, planos, servicos, servicos_emergencia, servicos_emergencia_n_logada, servicos_n_logado } from '../controllers/home.controller.js'
 import { verificarToken } from '../middlewares/logger.middleware.js'
 import { uploadConfig } from '../middlewares/upload.middleware.js'
 
@@ -216,5 +216,7 @@ router.get("/user/planos", verificarToken, planos)
 router.delete("/user/planos/cancelar", verificarToken, cancelar_plano)
 
 router.delete("/user/agendamento/cancelar/:id", verificarToken, cancelar_agendamento)
+
+router.get("/user/buscar/perfil", verificarToken, buscarPerfil)
 
 export default router
