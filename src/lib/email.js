@@ -2,32 +2,17 @@ import nodemailer from 'nodemailer'
 
 const configOptions = nodemailer.createTransport({
     host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
+    port: 587,
+    secure: false,
+    requireTLS: true,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     },
     tls: {
-        ciphers: 'SSLv3',
         rejectUnauthorized: false
     }
 });
-
-const net = require('net');
-const socket = net.createConnection(465, 'smtp.gmail.com', () => {
-    console.log('Conexão bem-sucedida com o SMTP do Google!');
-    socket.end();
-});
-socket.on('error', (err) => console.log('Erro de conexão:', err));
-
-configOptions.verify((error, success) => {
-  if (error) {
-    console.error("Erro na conexão SMTP:", error);
-  } else {
-    console.log("Servidor SMTP pronto para enviar emails");
-  }
-})
 
 
 
