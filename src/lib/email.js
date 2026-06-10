@@ -5,6 +5,7 @@ const configOptions = nodemailer.createTransport({
     port: 587,
     secure: false,
     requireTLS: true,
+    family: 4, 
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
@@ -15,7 +16,7 @@ const configOptions = nodemailer.createTransport({
     connectionTimeout: 10000, 
     greetingTimeout: 10000,
     socketTimeout: 10000
-});
+})
 
 
 configOptions.verify((error, success) => {
