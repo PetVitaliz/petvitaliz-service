@@ -136,6 +136,6 @@ enum pet_sexo {
 
 enum consulta_status {
   em_espera    @map("em espera")
-  em_endamento @map("em andamento")
+  em_andamento @map("em andamento")
   finalizado   @map("finalizado")
 }
