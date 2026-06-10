@@ -181,7 +181,8 @@ export async function contato(req, res) {
 
     } catch (error) {
         return res.status(500).send({
-            mensagem: "Erro ao processar o email"
+            mensagem: "Erro ao processar o email",
+            erro: error.message
         })
     }
     
@@ -589,7 +590,7 @@ export async function pagamento(req, res) {
             }
         });
 
-        emailPlanoAssinado(
+        await emailPlanoAssinado(
             nome, 
             sobrenome, 
             email, 
