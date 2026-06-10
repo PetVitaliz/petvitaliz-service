@@ -181,8 +181,7 @@ export async function contato(req, res) {
 
     } catch (error) {
         return res.status(500).send({
-            mensagem: "Erro ao processar o email",
-            erro: error.message
+            mensagem: "Erro ao processar o email"
         })
     }
     
